@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>عقد إيجار منتجع</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#2980b9">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<style>
+:root{ --brand-blue:#2980b9; }
+body{
+  font-family:'Times New Roman', Arial, Tahoma, sans-serif;
+  direction:rtl; margin:0; padding:0; background:#fdf5e6; text-align:right;
+}
+.container{
+  max-width:800px; margin:16px auto; padding:20px; background:#fff;
+  border-radius:14px; border:3px solid var(--brand-blue);
+}
+h1{text-align:center; color:#2c3e50; font-size:26px;}
+.title-underline{width:140px; height:3px; background:var(--brand-blue); margin:6px auto 12px; border-radius:2px;}
+.booking-number{color:#e53935; font-weight:bold; font-size:22px; text-align:center;}
+.info-row{margin:6px 0;}
+.dates-block{background:#f9f9f9; border:1px solid #ccc; border-radius:8px; padding:10px; margin:12px 0; font-size:15px;}
+.terms li{margin:6px 0;}
+.season-note{color:#c62828; font-weight:bold;}
+.contract-footer{text-align:center; font-size:12px; color:#555; margin-top:18px;}
+form{
+  max-width:520px; margin:18px auto; background:#fff;
+  padding:16px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,.07);
+}
+label{display:block; margin-top:12px; font-weight:bold;}
+input,select{width:100%; padding:10px; margin-top:6px; border-radius:8px; border:1px solid #ccc;}
+.options-row{display:flex; flex-wrap:wrap; justify-content:space-between; gap:12px; margin-top:16px;}
+.option-block{display:flex; align-items:center; gap:6px;}
+.option-block input[type="checkbox"] { width: auto; margin-top: 0; }
+.option-block label { margin-top: 0; font-weight: normal; }
+
+button{padding:12px; background:#27ae60; color:#fff; border:none; border-radius:10px; cursor:pointer; width:100%; margin-top:16px;}
+.btn{background:var(--brand-blue); color:#fff; border:none; padding:12px 16px; border-radius:10px; cursor:pointer;}
+.btn-whatsapp{background:#25d366;}
+.actions{display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:10px;}
+@media print {.container{border:3px solid var(--brand-blue)!important;}}
+</style>
+</head>
+<body>
+
+<form id="bookingForm">
+  <label>اختر المنتجع:</label>
+  <select id="resortSelect" required>
+    <option value="" disabled selected>اختر المنتجع</option>
+    <option value="منتجع تامبا">منتجع تامبا</option>
+    <option value="منتجع فيولاراند">منتجع فيولاراند</option>
+  </select>
+
+  <label>اسم المستأجر:</label>
+  <input type="text" id="customerName" required>
+
+  <label>العربون (ريال):</label>
+  <input type="number" id="deposit" min="0" required>
+
+  <label>المتبقي (ريال):</label>
+  <input type="number" id="remaining" min="0" required>
+
+  <label>تاريخ الحجز:</label>
+  <input type="date" id="bookingDate" required>
+
+  <div class="options-row">
+    <div class="option-block">
+      <input type="checkbox" id="overnight"><label for="overnight">مبيت</label>
+    </div>
+    <div class="option-block">
+      <input type="checkbox" id="noPool"><label for="noPool">بدون مسبح</label>
+    </div>
+    <div class="option-block">
+      <span>خاص بمنتجع تامبا:</span>
+      <input type="checkbox" id="summer"><label for="summer">صيف</label>
+      <input type="checkbox" id="winter"><label for="winter">شتاء</label>
+    </div>
+  </div>
+  <button type="submit">عرض العقد</button>
+</form>
+
+<div id="contract" class="container" style="display:none;">
+  <h1 id="contractTitle"></h1>
+  <div class="title-underline"></div>
+  <div id="bookingNumber" class="booking-number"></div>
+  <div id="introTextContainer"></div>
+  <div id="bookingInfo"></div>
+  <hr>
+  <div class="terms">
+    <h3>الشروط:</h3>
+    <ul id="termsList"></ul>
+    <p><strong>الرجاء الرد بكلمة موافق</strong></p>
+  </div>
+  <div id="contractFooter" class="contract-footer"></div>
+
+  <div class="actions">
+    <button id="saveAllBtn" class="btn">حفظ ومشاركة (واتساب)</button>
+    <button id="calendarICSBtn" class="btn">أضف إلى التقويم</button>
+  </div>
+</div>
+
+<script>
+const form=document.getElementById('bookingForm');
+const contract=document.getElementById('contract');
+const contractTitle=document.getElementById('contractTitle');
+const bookingNumberEl=document.getElementById('bookingNumber');
+const introTextContainer=document.getElementById('introTextContainer');
+const bookingInfo=document.getElementById('bookingInfo');
+const termsList=document.getElementById('termsList');
+const contractFooter=document.getElementById('contractFooter');
+
+const saveAllBtn=document.getElementById('saveAllBtn');
+const calendarICSBtn=document.getElementById('calendarICSBtn'); 
+
+const overnight=document.getElementById('overnight');
+const noPool=document.getElementById('noPool');
+const summer=document.getElementById('summer');
+const winter=document.getElementById('winter');
+
+summer.addEventListener('change',()=>{if(summer.checked)winter.checked=false;});
+winter.addEventListener('change',()=>{if(winter.checked)summer.checked=false;});
+
+function formatDate(d){
+ const days=["الأحد","الإثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
+ const months=["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+ return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+function getBaseTerms(){
+  return [
+    "العربون غير مسترد",
+    "المنتجع غير مسؤول عن فقدان الأغراض الشخصية",
+    "في حال الأضرار المادية يتحمل المستأجر كافة التكاليف",
+    "يمنع التدخين داخل غرف وصالات المنتجع 🚭",
+    "يجب إبلاغ الحارس وقت الخروج لإخلاء المسؤولية",
+    "الالتزام بأوقات الدخول والخروج المحددة"
+  ];
+}
+function getSeasonTerms(){
+  const t=[];
+  if(summer.checked)t.push({text:"الملعب الصابوني للأطفال ويتحمل المستأجر أي تلفيات في الملعب الصابوني",className:"season-note"});
+  if(winter.checked)t.push({text:"يرجى عدم إشعال النار داخل الخيمة أو على الزيل",className:"season-note"});
+  return t;
+}
+function renderTerms(){
+  termsList.innerHTML="";
+  getBaseTerms().forEach(t=>{
+    const li=document.createElement('li');li.textContent=t;termsList.appendChild(li);
+  });
+  getSeasonTerms().forEach(t=>{
+    const li=document.createElement('li');li.className=t.className;li.textContent=t.text;termsList.appendChild(li);
+  });
+}
+function formatDateForCal(d){
+ const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),da=String(d.getDate()).padStart(2,'0');
+ return `${y}${m}${da}`;
+}
+
+form.addEventListener('submit',e=>{
+  e.preventDefault();
+  const resort=document.getElementById('resortSelect').value;
+  const name=document.getElementById('customerName').value;
+  const dep=document.getElementById('deposit').value;
+  const rem=document.getElementById('remaining').value;
+  const date=new Date(document.getElementById('bookingDate').value+"T00:00:00");
+  const hours=`من ٣ مساءً إلى ${overnight.checked?"١١ صباحًا":"٦ صباحًا"}`;
+  
+  const hoursColor = overnight.checked ? "red" : "green";
+  
+  const today=formatDate(new Date());
+  const bookingNumber=resort==="منتجع تامبا"?"0117":"201";
+
+  contractTitle.textContent=`عقد إيجار ${resort}`;
+  bookingNumberEl.textContent=`رقم الحجز: ${bookingNumber}`;
+  introTextContainer.innerHTML=`<p style="text-align:center;font-size:17px;">أُبرم هذا العقد بين الطرفين:<br>الطرف الأول: ${resort}<br>والطرف الثاني: ${name}<br>وذلك وفقًا للشروط والأحكام الموضحة أدناه.</p>`;
+  
+  // === (تعديل) JavaScript: إضافة "يشمل مبيت" في حال تم تحديده ===
+  bookingInfo.innerHTML=`<div class="info-row"><b>اسم المستأجر:</b> ${name}</div>
+  <div class="info-row"><b>العربون:</b> ${dep} ريال</div>
+  <div class="info-row"><b>المتبقي:</b> ${rem} ريال</div>
+  <div class="info-row"><b>تاريخ الحجز:</b> ${formatDate(date)}</div>
+  <div class="info-row" style="color: ${hoursColor}; font-weight: bold;"><b>ساعات الحجز:</b> ${hours}</div>
+  ${overnight.checked ? `<div class="info-row" style="color: green; font-weight: bold;"><b>يشمل مبيت</b></div>` : ''}
+  ${noPool.checked ? `<div class="info-row" style="color: red; font-weight: bold;"><b>بدون مسبح</b></div>` : ''}`;
+  
+  renderTerms();
+  contractFooter.innerHTML=`تاريخ تحرير العقد: ${today}<br>تم إعداد هذا العقد إلكترونيًا — ${resort}`;
+  contract.style.display="block";
+
+  // --- وظيفة زر الحفظ والمشاركة (صورة + واتساب) ---
+  saveAllBtn.onclick = function() {
+    
+    // 1. وظيفة حفظ الصورة
+    document.querySelector('.actions').style.display = 'none'; // إخفاء الأزرار
+    html2canvas(contract, { scale: 2, useCORS: true }).then(canvas => {
+      const link = document.createElement('a');
+      link.download = `${name}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      document.querySelector('.actions').style.display = 'flex'; // إعادة إظهار الأزرار
+
+      // 2. وظيفة واتساب
+      const info={
+        "منتجع تامبا":{phone:"0567863628",location:"http://googleusercontent.com/maps/google.com/0"},
+        "منتجع فيولاراند":{phone:"0567863628",location:"http://googleusercontent.com/maps/google.com/1"}
+      }[resort];
+      const msg=[
+        `عقد إيجار ${resort}`,
+        `رقم الحجز: ${bookingNumber}`,
+        `المستأجر: ${name}`,
+        `التاريخ: ${formatDate(date)}`,
+        `الوقت: ${hours}`,
+        `العربون: ${dep} ريال`,
+        `المتبقي: ${rem} ريال`,
+        overnight.checked?"يشمل مبيت ✅":"بدون مبيت",
+        noPool.checked ? "بدون مسبح ❌" : "يشمل مسبح ✅",
+        "",
+        "الشروط:",
+        ...getBaseTerms(),
+        ...getSeasonTerms().map(x=>x.text),
+        "",
+        `📞 رقم الحارس: ${info.phone}`,
+        `📍 موقع المنتجع: ${info.location}`,
+        "",
+        `تاريخ تحرير العقد: ${today}`,
+        `تم إعداد هذا العقد إلكترونيًا — ${resort}`,
+        "الرجاء الرد بكلمة: موافق"
+      ].join('\n');
+      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
+    });
+  };
+
+  // --- وظيفة زر التقويم (رابط جوجل) ---
+  calendarICSBtn.onclick = () => {
+    
+    // 1. إعداد العنوان الجديد (مع التحقق من الخانات)
+    let title = `${name} ${dep}-${rem}`; // العنوان الأساسي
+    if (overnight.checked) {
+        title += " (مبيت)"; // إضافة "مبيت"
+    }
+    if (noPool.checked) {
+        title += " (بدون مسبح)"; // إضافة "بدون مسبح"
+    }
+
+    // 2. إعداد التواريخ (يوم كامل)
+    const startDate = formatDateForCal(date);
+    const nextDay = new Date(date.getTime() + 86400000); // اليوم التالي
+    const endDate = formatDateForCal(nextDay);
+    
+    // 3. إعداد التفاصيل
+    const allTerms = [...getBaseTerms(), ...getSeasonTerms().map(x => x.text)].join('\n- ');
+    const details = [
+      `المنتجع: ${resort}`,
+      `رقم الحجز: ${bookingNumber}`,
+      `التاريخ: ${formatDate(date)}`,
+      `العربون: ${dep} ريال`,
+      `المتبقي: ${rem} ريال`,
+      overnight.checked ? "يشمل مبيت ✅" : "بدون مبيت",
+      noPool.checked ? "بدون مسبح ❌" : "يشمل مسبح ✅",
+      `ساعات الحجز: ${hours}`,
+      "",
+      "الشروط:",
+      `- ${allTerms}`
+    ].join('\n'); // جوجل يفهم \n في التفاصيل
+
+    // 4. إعداد الموقع
+    const resortLocation = {
+      "منتجع تامبا": "https://maps.app.goo.gl/Bgoqkr2v27vxdFDX8",
+      "منتجع فيولاراند": "https://maps.app.goo.gl/GANKbPFBXttKdftaA"
+    }[resort];
+      
+    // 5. إنشاء الرابط
+    const params = new URLSearchParams();
+    params.append('action', 'TEMPLATE');
+    params.append('text', title);
+    params.append('dates', `${startDate}/${endDate}`); // صيغة يوم كامل
+    params.append('details', details);
+    params.append('location', resortLocation);
+    params.append('sf', 'true');
+    params.append('output', 'chrome');
+
+    const googleCalendarUrl = `https://www.google.com/calendar/render?${params.toString()}`;
+
+    // 6. فتح الرابط في نافذة جديدة
+    window.open(googleCalendarUrl, '_blank');
+  };
+});
+</script>
+</body>
+</html>
