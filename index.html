@@ -40,7 +40,8 @@ form{
 }
 label{display:block; margin-top:12px; font-weight:bold; text-align: right; direction: rtl;} /* (تعديل) This fixes colon alignment */
 input,select{width:100%; padding:10px; margin-top:6px; border-radius:8px; border:1px solid #ccc; text-align: right;}
-.options-row{display:flex; flex-wrap:wrap; justify-content: flex-start; gap:12px; margin-top:16px;} /* (تعديل) This groups checkboxes */
+/* === (تعديل) CSS: تم تغيير "flex-start" إلى "flex-end" لإصلاح محاذاة الهاتف === */
+.options-row{display:flex; flex-wrap:wrap; justify-content: flex-end; gap:12px; margin-top:16px;}
 .option-block{display:flex; align-items:center; gap:6px;}
 .option-block input[type="checkbox"] { width: auto; margin-top: 0; }
 .option-block label { margin-top: 0; font-weight: normal; }
@@ -367,5 +368,6 @@ form.addEventListener('submit',e=>{
 </body>
 
 </html>
+
 
 
