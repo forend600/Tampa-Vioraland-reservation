@@ -35,10 +35,10 @@ h1{text-align:center; color:#2c3e50; font-size:26px;}
 .season-note{color:#c62828; font-weight:bold;}
 .contract-footer{text-align:center; font-size:12px; color:#555; margin-top:18px;}
 form{
-  max-width:520px; margin:18px auto; background:#fff;
+  max-width:520px; margin: 18px 20px; background:#fff; /* (تعديل) This adds left/right margin */
   padding:16px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,.07);
 }
-label{display:block; margin-top:12px; font-weight:bold; text-align: right;}
+label{display:block; margin-top:12px; font-weight:bold; text-align: right; direction: rtl;} /* (تعديل) This fixes colon alignment */
 input,select{width:100%; padding:10px; margin-top:6px; border-radius:8px; border:1px solid #ccc; text-align: right;}
 .options-row{display:flex; flex-wrap:wrap; justify-content:space-between; gap:12px; margin-top:16px;}
 .option-block{display:flex; align-items:center; gap:6px;}
@@ -365,3 +365,4 @@ form.addEventListener('submit',e=>{
 </body>
 
 </html>
+
