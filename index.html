@@ -23,7 +23,7 @@ body{
   direction:rtl; margin:0; padding:0; background:#fdf5e6; text-align:right;
 }
 .container{
-  max-width:800px; margin:16px auto; padding:20px; background:#fff;
+  max-width:800px; margin:16px 10px; padding:20px; background:#fff; /* (تعديل) This adds side margin */
   border-radius:14px; border:3px solid var(--brand-blue);
 }
 h1{text-align:center; color:#2c3e50; font-size:26px;}
@@ -35,12 +35,12 @@ h1{text-align:center; color:#2c3e50; font-size:26px;}
 .season-note{color:#c62828; font-weight:bold;}
 .contract-footer{text-align:center; font-size:12px; color:#555; margin-top:18px;}
 form{
-  max-width:520px; margin: 18px 20px; background:#fff; /* (تعديل) This adds left/right margin */
+  max-width:520px; margin: 18px 10px; background:#fff; /* (تعديل) This adds side margin */
   padding:16px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,.07);
 }
 label{display:block; margin-top:12px; font-weight:bold; text-align: right; direction: rtl;} /* (تعديل) This fixes colon alignment */
 input,select{width:100%; padding:10px; margin-top:6px; border-radius:8px; border:1px solid #ccc; text-align: right;}
-.options-row{display:flex; flex-wrap:wrap; justify-content:space-between; gap:12px; margin-top:16px;}
+.options-row{display:flex; flex-wrap:wrap; justify-content: flex-start; gap:12px; margin-top:16px;} /* (تعديل) This groups checkboxes */
 .option-block{display:flex; align-items:center; gap:6px;}
 .option-block input[type="checkbox"] { width: auto; margin-top: 0; }
 .option-block label { margin-top: 0; font-weight: normal; }
@@ -345,14 +345,16 @@ form.addEventListener('submit',e=>{
     }[resort];
       
     // 5. إنشاء الرابط
-    const params = new URLSearchParams();
-    params.append('action', 'TEMPLATE');
-    params.append('text', title);
-    params.append('dates', `${startDate}/${endDate}`); 
-    params.append('details', details);
-    params.append('location', resortLocation);
-    params.append('sf', 'true');
-    params.append('output', 'chrome');
+    const params = new URLSearchParams();
+    params.append('action', 'TEMPLATE');
+    params.append('text', title);
+    params.append('dates', `${startDate}/${endDate}`); 
+    params.append('details', details);
+    params.append('location', resortLocation);
+    params.append('sf', 'true');
+    params.append('output', 'chrome');
+    // === (جديد) JavaScript: هذه الإضافة تجعل الحدث "مشغول" ===
+    params.append('trp', '0'); // 0 = Busy, 1 = Free
 
     // === (تصحيح) تم إصلاح الرابط هنا ===
     const googleCalendarUrl = `https://www.google.com/calendar/render?${params.toString()}`;
@@ -365,4 +367,5 @@ form.addEventListener('submit',e=>{
 </body>
 
 </html>
+
 
