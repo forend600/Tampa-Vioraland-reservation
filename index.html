@@ -23,7 +23,7 @@ body{
   direction:rtl; margin:0; padding:0; background:#fdf5e6; text-align:right;
 }
 .container{
-  max-width:800px; margin:16px 10px; padding:20px; background:#fff; /* (تعديل) This adds side margin */
+  max-width:800px; margin:16px 50px; padding:20px; background:#fff; /* (تعديل) This adds side margin */
   border-radius:14px; border:3px solid var(--brand-blue);
 }
 h1{text-align:center; color:#2c3e50; font-size:26px;}
@@ -41,7 +41,7 @@ form{
 label{display:block; margin-top:12px; font-weight:bold; text-align: right; direction: rtl;} /* (تعديل) This fixes colon alignment */
 input,select{width:100%; padding:10px; margin-top:6px; border-radius:8px; border:1px solid #ccc; text-align: right;}
 /* === (تعديل) CSS: تم تغيير "flex-start" إلى "flex-end" لإصلاح محاذاة الهاتف === */
-.options-row{display:flex; flex-wrap:wrap; justify-content: flex-end; gap:12px; margin-top:16px;}
+.options-row{display:flex; flex-wrap:wrap; justify-content: flex-end; gap:6px; margin-top:16px;}
 .option-block{display:flex; align-items:center; gap:6px;}
 .option-block input[type="checkbox"] { width: auto; margin-top: 0; }
 .option-block label { margin-top: 0; font-weight: normal; }
@@ -62,6 +62,12 @@ button{padding:12px; background:#27ae60; color:#fff; border:none; border-radius:
     <option value="منتجع تامبا">منتجع تامبا</option>
     <option value="منتجع فيورالاند">منتجع فيورالاند</option>
   </select>
+
+  <div class="options-row" style="margin-top: 10px; justify-content: flex-end;">
+    <div class="option-block">
+      <input type="checkbox" id="bookBothResorts"><label for="bookBothResorts">حجز المنتجعين لنفس العميل</label>
+    </div>
+  </div>
 
   <label>اسم المستأجر:</label>
   <input type="text" id="customerName" required>
@@ -130,6 +136,8 @@ const calendarICSBtn=document.getElementById('calendarICSBtn');
 const resortSelect = document.getElementById('resortSelect');
 const tampaOptions = document.getElementById('tampaOptions');
 
+const bookBothResorts = document.getElementById('bookBothResorts');
+
 const overnight=document.getElementById('overnight');
 const noPool=document.getElementById('noPool');
 const winterPeriod=document.getElementById('winterPeriod');
@@ -139,15 +147,27 @@ const winter=document.getElementById('winter');
 summer.addEventListener('change',()=>{if(summer.checked)winter.checked=false;});
 winter.addEventListener('change',()=>{if(winter.checked)summer.checked=false;});
 
-resortSelect.addEventListener('change', () => {
-  if (resortSelect.value === 'منتجع تامبا') {
-    tampaOptions.style.display = 'flex'; 
+function updateResortOptionsVisibility() {
+  const isTampaSelected = (resortSelect.value === 'منتجع تامبا');
+  const isBothBooked = bookBothResorts.checked;
+
+  if (isBothBooked) {
+    resortSelect.removeAttribute('required'); 
   } else {
-    tampaOptions.style.display = 'none'; 
+    resortSelect.setAttribute('required', 'true'); 
+  }
+
+  if (isTampaSelected || isBothBooked) {
+    tampaOptions.style.display = 'flex';
+  } else {
+    tampaOptions.style.display = 'none';
     summer.checked = false;
     winter.checked = false;
   }
-});
+}
+
+resortSelect.addEventListener('change', updateResortOptionsVisibility);
+bookBothResorts.addEventListener('change', updateResortOptionsVisibility);
 
 function formatDate(d){
  const days=["الأحد","الإثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
@@ -184,9 +204,26 @@ function formatDateForCal(d){
  return `${y}${m}${da}`;
 }
 
+// === (جديد) JavaScript: أضف هذه الوظيفة الجديدة ===
+function formatDateTimeForGoogle(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const da = String(d.getDate()).padStart(2, '0');
+  const h = String(d.getHours()).padStart(2, '0');
+  const min = String(d.getMinutes()).padStart(2, '0');
+  return `${y}${m}${da}T${h}${min}00`;
+}
+
 form.addEventListener('submit',e=>{
   e.preventDefault();
-  const resort = resortSelect.value;
+
+  let resort;
+  if (bookBothResorts.checked) {
+    resort = "منتجع (تامبا وفيورالاند)";
+  } else {
+    resort = resortSelect.value;
+  }
+  
   const name=document.getElementById('customerName').value;
   const dep=document.getElementById('deposit').value;
   const rem=document.getElementById('remaining').value;
@@ -203,10 +240,18 @@ form.addEventListener('submit',e=>{
     hours = `من ٣ مساءً إلى ${overnight.checked ? "١١ صباحًا" : "٦ صباحًا"}`;
   }
   
-  const hoursColor = overnight.checked ? "darkred" : "darkgreen";
+  const hoursColor = overnight.checked ? "red" : "green";
   
   const today=formatDate(new Date());
-  const bookingNumber=resort==="منتجع تامبا"?"0117":"201";
+  
+  // === (تعديل) JavaScript: منطق رقم الحجز المحدث ===
+  let bookingNumber;
+  if (bookBothResorts.checked) {
+    bookingNumber = "933";
+  } else {
+    let resortKeyForBooking = resortSelect.value;
+    bookingNumber = (resortKeyForBooking === "منتجع تامبا" || resortKeyForBooking === "") ? "0117" : "201";
+  }
 
   contractTitle.textContent=`عقد إيجار ${resort}`;
   bookingNumberEl.textContent=`رقم الحجز: ${bookingNumber}`;
@@ -218,8 +263,8 @@ form.addEventListener('submit',e=>{
   <div class="info-row"><b>تاريخ الحجز:</b> ${formatDate(date)}</div>
   <div class="info-row" style="color: ${hoursColor}; font-weight: bold;"><b>ساعات الحجز:</b> ${hours}</div>
   ${overnight.checked ? 
-    `<div class="info-row" style="color: darkred; font-weight: bold; margin-top: 10px;"><b>يشمل مبيت</b></div>` : 
-    `<div class="info-row" style="color: darkgreen; font-weight: bold; margin-top: 10px;"><b>بدون مبيت</b></div>`
+    `<div class="info-row" style="color: red; font-weight: bold; margin-top: 10px;"><b>يشمل مبيت</b></div>` : 
+    `<div class="info-row" style="color: green; font-weight: bold; margin-top: 10px;"><b>بدون مبيت</b></div>`
   }
   ${noPool.checked ? 
     `<div class="info-row" style="color: red; font-weight: bold;"><b>بدون مسبح</b></div>` : 
@@ -229,18 +274,35 @@ form.addEventListener('submit',e=>{
   renderTerms();
   contractFooter.innerHTML=`تاريخ تحرير العقد: ${today}<br>تم إعداد هذا العقد إلكترونيًا — ${resort}`;
   contract.style.display="block";
+});
 
   // --- وظيفة زر الحفظ والمشاركة (صورة + واتساب) ---
   saveAllBtn.onclick = function() {
     
-    // === (تصحيح) جلب المتغيرات المطلوبة عند الضغط ===
-    const resort = resortSelect.value;
+    let resort;
+    let resortKeyForInfo; 
+    if (bookBothResorts.checked) {
+      resort = "منتجع (تامبا وفيورالاند)";
+      resortKeyForInfo = "منتجع تامبا"; 
+    } else {
+      resort = resortSelect.value;
+      resortKeyForInfo = resortSelect.value;
+    }
+
     const name = document.getElementById('customerName').value;
     const dep = document.getElementById('deposit').value;
     const rem = document.getElementById('remaining').value;
     const date = new Date(document.getElementById('bookingDate').value + "T00:00:00");
     const today = formatDate(new Date());
-    const bookingNumber = resort === "منتجع تامبا" ? "0117" : "201";
+    
+    // === (تعديل) JavaScript: منطق رقم الحجز المحدث ===
+    let bookingNumber;
+    if (bookBothResorts.checked) {
+      bookingNumber = "933";
+    } else {
+      bookingNumber = (resortKeyForInfo === "منتجع تامبا" || resortKeyForInfo === "") ? "0117" : "201";
+    }
+    
     let hours;
     if (winterPeriod.checked) {
         hours = overnight.checked ? "من ٢ مساءً إلى ١٠ صباحًا" : "من ٢ مساءً إلى ٢ صباحًا";
@@ -259,11 +321,12 @@ form.addEventListener('submit',e=>{
 
       // 2. وظيفة واتساب
       const info={
-        "منتجع تامبا":{phone:"0567863628",location:"https://maps.app.goo.gl/pFxSQJ2CgGAXtsTJ9"},
-        "منتجع فيورالاند":{phone:"0567863628",location:"https://maps.app.goo.gl/NkGwhmAN6eur34Xi6"}
-      }[resort];
+        "منتجع تامبا":{phone:"0567863628",location:"http://googleusercontent.com/maps/google.com/0"},
+        "منتجع فيورالاند":{phone:"0567863628",location:"http://googleusercontent.com/maps/google.com/1"},
+        "":{phone:"0567863628",location:"http://googleusercontent.com/maps/google.com/0"} 
+      }[resortKeyForInfo]; 
       const msg=[
-        `عقد إيجار ${resort}`,
+        `عقد إيجار ${resort}`, 
         `رقم الحجز: ${bookingNumber}`,
         `المستأجر: ${name}`,
         `التاريخ: ${formatDate(date)}`,
@@ -272,6 +335,7 @@ form.addEventListener('submit',e=>{
         `المتبقي: ${rem} ريال`,
         overnight.checked?"يشمل مبيت ✅":"بدون مبيت",
         noPool.checked ? "بدون مسبح ❌" : "يشمل مسبح ✅",
+        bookBothResorts.checked ? "تم حجز المنتجعين ✅" : "", 
         "",
         "الشروط:",
         ...getBaseTerms(),
@@ -281,10 +345,9 @@ form.addEventListener('submit',e=>{
         `📍 موقع المنتجع: ${info.location}`,
         "",
         `تاريخ تحرير العقد: ${today}`,
-        `تم إعداد هذا العقد إلكترونيًا — ${resort}`,
+        `تم إعداد هذا العقد إلكترونيًا — ${resort}`, 
         "الرجاء الرد بكلمة: موافق"
       ].join('\n');
-      // === (تصحيح) تم إصلاح الرابط هنا ===
       window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
     });
   };
@@ -292,43 +355,66 @@ form.addEventListener('submit',e=>{
   // --- وظيفة زر التقويم (رابط جوجل) ---
   calendarICSBtn.onclick = () => {
     
-    // === (تصحيح) جلب المتغيرات المطلوبة عند الضغط ===
-    const resort = resortSelect.value;
+    let resort;
+    let resortKeyForInfo;
+    if (bookBothResorts.checked) {
+      resort = "منتجع (تامبا وفيورالاند)";
+      resortKeyForInfo = "منتجع تامبا"; 
+    } else {
+      resort = resortSelect.value;
+      resortKeyForInfo = resortSelect.value;
+    }
+
     const name = document.getElementById('customerName').value;
     const dep = document.getElementById('deposit').value;
     const rem = document.getElementById('remaining').value;
-    const date = new Date(document.getElementById('bookingDate').value + "T00:00:00");
-    const bookingNumber = resort === "منتجع تامبا" ? "0117" : "201";
-    let hours;
-    if (winterPeriod.checked) {
-        hours = overnight.checked ? "من ٢ مساءً إلى ١٠ صباحًا" : "من ٢ مساءً إلى ٢ صباحًا";
+    
+    // === (تعديل) JavaScript: منطق رقم الحجز المحدث ===
+    let bookingNumber;
+    if (bookBothResorts.checked) {
+      bookingNumber = "933";
     } else {
-        hours = `من ٣ مساءً إلى ${overnight.checked ? "١١ صباحًا" : "٦ صباحًا"}`;
+      bookingNumber = (resortKeyForInfo === "منتجع تامبا" || resortKeyForInfo === "") ? "0117" : "201";
     }
 
-    // 1. إعداد العنوان الجديد (مع التحقق من الخانات)
+    // 1. إعداد العنوان
     let title = `${name} ${dep}-${rem}`; 
-    if (overnight.checked) {
-        title += " (مبيت)"; 
-    }
-    if (noPool.checked) {
-        title += " (بدون مسبح)"; 
-    }
-    if (winterPeriod.checked) {
-        title += " (فترة شتوية)";
-    }
+    if (overnight.checked) title += " (مبيت)"; 
+    if (noPool.checked) title += " (بدون مسبح)"; 
+    if (winterPeriod.checked) title += " (فترة شتوية)";
+    if (bookBothResorts.checked) title += " (المنتجعين)";
 
-    // 2. إعداد التواريخ (يوم كامل)
-    const startDate = formatDateForCal(date);
-    const nextDay = new Date(date.getTime() + 86400000); 
-    const endDate = formatDateForCal(nextDay);
+    // 2. إعداد التواريخ والأوقات الدقيقة
+    let startDateObj, endDateObj;
+    const baseDate = new Date(document.getElementById('bookingDate').value+"T00:00:00");
+    const nextDay = new Date(baseDate.getTime() + 86400000); 
+
+    if (winterPeriod.checked) {
+      startDateObj = new Date(baseDate.setHours(14, 0, 0)); // 2:00 PM
+      if (overnight.checked) {
+        endDateObj = new Date(nextDay.setHours(10, 0, 0)); // 10:00 AM (Next Day)
+      } else {
+        endDateObj = new Date(nextDay.setHours(2, 0, 0)); // 2:00 AM (Next Day)
+      }
+    } else {
+      startDateObj = new Date(baseDate.setHours(15, 0, 0)); // 3:00 PM
+      if (overnight.checked) {
+        endDateObj = new Date(nextDay.setHours(11, 0, 0)); // 11:00 AM (Next Day)
+      } else {
+        endDateObj = new Date(nextDay.setHours(6, 0, 0)); // 6:00 AM (Next Day)
+      }
+    }
+    
+    const startDateString = formatDateTimeForGoogle(startDateObj);
+    const endDateString = formatDateTimeForGoogle(endDateObj);
     
     // 3. إعداد التفاصيل
+    const hours = `${startDateObj.getHours()}:${String(startDateObj.getMinutes()).padStart(2, '0')} to ${endDateObj.getHours()}:${String(endDateObj.getMinutes()).padStart(2, '0')}`; // For description
     const allTerms = [...getBaseTerms(), ...getSeasonTerms().map(x => x.text)].join('\n- ');
     const details = [
-      `المنتجع: ${resort}`,
+      `المنتجع: ${resort}`, 
       `رقم الحجز: ${bookingNumber}`,
-      `التاريخ: ${formatDate(date)}`,
+      `التاريخ: ${formatDate(baseDate)}`,
       `العربون: ${dep} ريال`,
       `المتبقي: ${rem} ريال`,
       overnight.checked ? "يشمل مبيت ✅" : "بدون مبيت",
@@ -341,33 +427,28 @@ form.addEventListener('submit',e=>{
 
     // 4. إعداد الموقع
     const resortLocation = {
-      "منتجع تامبا": "https://maps.app.goo.gl/pFxSQJ2CgGAXtsTJ9",
-      "منتجع فيورالاند": "https://maps.app.goo.gl/NkGwhmAN6eur34Xi6"
-    }[resort];
+      "منتجع تامبا": "http://googleusercontent.com/maps/google.com/0",
+      "منتجع فيورالاند": "http://googleusercontent.com/maps/google.com/1",
+       "":{phone:"0567863628",location:"http://googleusercontent.com/maps/google.com/0"}
+    }[resortKeyForInfo]; 
       
     // 5. إنشاء الرابط
-    const params = new URLSearchParams();
-    params.append('action', 'TEMPLATE');
-    params.append('text', title);
-    params.append('dates', `${startDate}/${endDate}`); 
-    params.append('details', details);
-    params.append('location', resortLocation);
-    params.append('sf', 'true');
-    params.append('output', 'chrome');
-    // === (جديد) JavaScript: هذه الإضافة تجعل الحدث "مشغول" ===
-    params.append('trp', '0'); // 0 = Busy, 1 = Free
+    const params = new URLSearchParams();
+    params.append('action', 'TEMPLATE');
+    params.append('text', title);
+    params.append('dates', `${startDateString}/${endDateString}`); 
+    params.append('details', details);
+    params.append('location', resortLocation);
+    params.append('sf', 'true');
+    params.append('output', 'chrome');
+    // We don't need trp=0 because timed events default to Busy.
 
-    // === (تصحيح) تم إصلاح الرابط هنا ===
     const googleCalendarUrl = `https://www.google.com/calendar/render?${params.toString()}`;
 
     // 6. فتح الرابط في نافذة جديدة
     window.open(googleCalendarUrl, '_blank');
   };
-});
 </script>
 </body>
 
 </html>
-
-
-
