@@ -385,9 +385,14 @@ form.addEventListener('submit',e=>{
 
     // 2. === (تعديل) إعداد التواريخ ليوم كامل ===
     const baseDate = new Date(document.getElementById('bookingDate').value+"T00:00:00");
-    const startDateString = formatDateForCal(baseDate); // e.g. 20251125
-    const nextDay = new Date(baseDate.getTime() + 86400000); 
-    const endDateString = formatDateForCal(nextDay); // e.g. 20251126
+    
+    // Create an end date set to 23:59 on the SAME day
+    const endDate = new Date(baseDate.getTime());
+    endDate.setHours(23);
+    endDate.setMinutes(59);
+
+    const startDateString = formatDateTimeForGoogle(baseDate); // e.g. 20251105T000000
+    const endDateString = formatDateTimeForGoogle(endDate);   // e.g. 20251105T235900
     
     // 3. إعداد التفاصيل (ما زالت تحتوي على الأوقات الصحيحة)
     let hours;
@@ -444,3 +449,4 @@ form.addEventListener('submit',e=>{
 </body>
 
 </html>
+
