@@ -348,8 +348,8 @@ form.addEventListener('submit',e=>{
         `تم إعداد هذا العقد إلكترونيًا — ${resort}`, 
         "الرجاء الرد بكلمة: موافق"
       ].join('\n');
-      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
-    });
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`,'_blank');
+  });
   };
 
   // --- (تعديل) وظيفة زر التقويم (لحجز يوم كامل) ---
@@ -449,4 +449,5 @@ form.addEventListener('submit',e=>{
 </body>
 
 </html>
+
 
