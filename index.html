@@ -352,104 +352,95 @@ form.addEventListener('submit',e=>{
     });
   };
 
-  // --- وظيفة زر التقويم (رابط جوجل) ---
-  calendarICSBtn.onclick = () => {
-    
-    let resort;
-    let resortKeyForInfo;
-    if (bookBothResorts.checked) {
-      resort = "منتجع (تامبا وفيورالاند)";
-      resortKeyForInfo = "منتجع تامبا"; 
-    } else {
-      resort = resortSelect.value;
-      resortKeyForInfo = resortSelect.value;
-    }
+  // --- (تعديل) وظيفة زر التقويم (لحجز يوم كامل) ---
+  calendarICSBtn.onclick = () => {
+    
+    let resort;
+    let resortKeyForInfo;
+    if (bookBothResorts.checked) {
+      resort = "منتجع (تامبا وفيورالاند)";
+      resortKeyForInfo = "منتجع تامبا"; 
+    } else {
+      resort = resortSelect.value;
+      resortKeyForInfo = resortSelect.value;
+    }
 
-    const name = document.getElementById('customerName').value;
-    const dep = document.getElementById('deposit').value;
-    const rem = document.getElementById('remaining').value;
-    
-    // === (تعديل) JavaScript: منطق رقم الحجز المحدث ===
-    let bookingNumber;
-    if (bookBothResorts.checked) {
-      bookingNumber = "933";
-    } else {
-      bookingNumber = (resortKeyForInfo === "منتجع تامبا" || resortKeyForInfo === "") ? "0117" : "201";
-    }
+    const name = document.getElementById('customerName').value;
+    const dep = document.getElementById('deposit').value;
+    const rem = document.getElementById('remaining').value;
+    
+    let bookingNumber;
+    if (bookBothResorts.checked) {
+      bookingNumber = "933";
+    } else {
+      bookingNumber = (resortKeyForInfo === "منتجع تامبا" || resortKeyForInfo === "") ? "0117" : "201";
+    }
 
-    // 1. إعداد العنوان
-    let title = `${name} ${dep}-${rem}`; 
-    if (overnight.checked) title += " (مبيت)"; 
-    if (noPool.checked) title += " (بدون مسبح)"; 
-    if (winterPeriod.checked) title += " (فترة شتوية)";
+    // 1. إعداد العنوان
+    let title = `${name} ${dep}-${rem}`; 
     if (bookBothResorts.checked) title += " (المنتجعين)";
+    if (overnight.checked) title += " (مبيت)"; 
+    if (noPool.checked) title += " (بدون مسبح)"; 
+    if (winterPeriod.checked) title += " (فترة شتوية)";
 
-    // 2. إعداد التواريخ والأوقات الدقيقة
-    let startDateObj, endDateObj;
+    // 2. === (تعديل) إعداد التواريخ ليوم كامل ===
     const baseDate = new Date(document.getElementById('bookingDate').value+"T00:00:00");
-    const nextDay = new Date(baseDate.getTime() + 86400000); 
-
+    const startDateString = formatDateForCal(baseDate); // e.g. 20251125
+    const nextDay = new Date(baseDate.getTime() + 86400000); 
+    const endDateString = formatDateForCal(nextDay); // e.g. 20251126
+    
+    // 3. إعداد التفاصيل (ما زالت تحتوي على الأوقات الصحيحة)
+    let hours;
     if (winterPeriod.checked) {
-      startDateObj = new Date(baseDate.setHours(14, 0, 0)); // 2:00 PM
       if (overnight.checked) {
-        endDateObj = new Date(nextDay.setHours(10, 0, 0)); // 10:00 AM (Next Day)
+        hours = "من ٢ مساءً إلى ١٠ صباحًا"; 
       } else {
-        endDateObj = new Date(nextDay.setHours(2, 0, 0)); // 2:00 AM (Next Day)
+        hours = "من ٢ مساءً إلى ٢ صباحًا"; 
       }
     } else {
-      startDateObj = new Date(baseDate.setHours(15, 0, 0)); // 3:00 PM
-      if (overnight.checked) {
-        endDateObj = new Date(nextDay.setHours(11, 0, 0)); // 11:00 AM (Next Day)
-      } else {
-        endDateObj = new Date(nextDay.setHours(6, 0, 0)); // 6:00 AM (Next Day)
-      }
+      hours = `من ٣ مساءً إلى ${overnight.checked ? "١١ صباحًا" : "٦ صباحًا"}`;
     }
-    
-    const startDateString = formatDateTimeForGoogle(startDateObj);
-    const endDateString = formatDateTimeForGoogle(endDateObj);
-    
-    // 3. إعداد التفاصيل
-    const hours = `${startDateObj.getHours()}:${String(startDateObj.getMinutes()).padStart(2, '0')} to ${endDateObj.getHours()}:${String(endDateObj.getMinutes()).padStart(2, '0')}`; // For description
-    const allTerms = [...getBaseTerms(), ...getSeasonTerms().map(x => x.text)].join('\n- ');
-    const details = [
-      `المنتجع: ${resort}`, 
-      `رقم الحجز: ${bookingNumber}`,
-      `التاريخ: ${formatDate(baseDate)}`,
-      `العربون: ${dep} ريال`,
-      `المتبقي: ${rem} ريال`,
-      overnight.checked ? "يشمل مبيت ✅" : "بدون مبيت",
-      noPool.checked ? "بدون مسبح ❌" : "يشمل مسبح ✅",
-      `ساعات الحجز: ${hours}`, 
-      "",
-      "الشروط:",
-      `- ${allTerms}`
-    ].join('\n'); 
+    const allTerms = [...getBaseTerms(), ...getSeasonTerms().map(x => x.text)].join('\n- ');
+    const details = [
+      `المنتجع: ${resort}`, 
+      `رقم الحجز: ${bookingNumber}`,
+      `التاريخ: ${formatDate(baseDate)}`,
+      `العربون: ${dep} ريال`,
+      `المتبقي: ${rem} ريال`,
+      overnight.checked ? "يشمل مبيت ✅" : "بدون مبيت",
+      noPool.checked ? "بدون مسبح ❌" : "يشمل مسبح ✅",
+      `ساعات الحجز: ${hours}`, // لا يزال يظهر الوقت الصحيح هنا
+      "",
+      "الشروط:",
+      `- ${allTerms}`
+    ].join('\n'); 
 
-    // 4. إعداد الموقع
-    const resortLocation = {
-      "منتجع تامبا": "https://maps.app.goo.gl/UJXsVpU2Y6TVY4vB9",
-      "منتجع فيورالاند": "https://maps.app.goo.gl/LwcejftXAfbTZvtMA",
-       "":{phone:"0567863628",location:"http://googleusercontent.com/maps/google.com/0"}
-    }[resortKeyForInfo]; 
-      
-    // 5. إنشاء الرابط
-    const params = new URLSearchParams();
-    params.append('action', 'TEMPLATE');
-    params.append('text', title);
-    params.append('dates', `${startDateString}/${endDateString}`); 
-    params.append('details', details);
-    params.append('location', resortLocation);
-    params.append('sf', 'true');
-    params.append('output', 'chrome');
-    // We don't need trp=0 because timed events default to Busy.
+    // 4. إعداد الموقع
+    const resortLocation = {
+      "منتجع تامبا": "http://googleusercontent.com/maps/google.com/2",
+      "منتجع فيورالاند": "http://googleusercontent.com/maps/google.com/3",
+       "":{phone:"0567863628",location:"http://googleusercontent.com/maps/google.com/0"}
+    }[resortKeyForInfo]; 
+      
+    // 5. إنشاء الرابط
+    const params = new URLSearchParams();
+    params.append('action', 'TEMPLATE');
+    params.append('text', title);
+    // === (تعديل) استخدام صيغة اليوم الكامل ===
+    params.append('dates', `${startDateString}/${endDateString}`); 
+    params.append('details', details);
+    params.append('location', resortLocation);
+    params.append('sf', 'true');
+    params.append('output', 'chrome');
+    // === (تعديل) إعادة "trp=0" لجعل اليوم الكامل "مشغول" ===
+    params.append('trp', '0'); // 0 = Busy, 1 = Free
 
-    const googleCalendarUrl = `https://www.google.com/calendar/render?${params.toString()}`;
+    const googleCalendarUrl = `https://www.google.com/calendar/render?${params.toString()}`;
 
-    // 6. فتح الرابط في نافذة جديدة
-    window.open(googleCalendarUrl, '_blank');
-  };
+    // 6. فتح الرابط في نافذة جديدة
+    window.open(googleCalendarUrl, '_blank');
+  };
 </script>
 </body>
 
 </html>
-
