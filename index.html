@@ -122,7 +122,7 @@ button{padding:12px; background:#27ae60; color:#fff; border:none; border-radius:
   <div id="bookingInfo"></div>
   <hr>
   <div class="terms">
-    <h3>الشروط:</h3>
+    <h3>:الشروط</h3>
     <ul id="termsList"></ul>
     <p><strong>الرجاء الرد بكلمة موافق</strong></p>
   </div>
@@ -357,7 +357,7 @@ form.addEventListener('submit',e=>{
         noPool.checked ? "بدون مسبح ❌" : "يشمل مسبح ✅",
         bookBothResorts.checked ? "تم حجز المنتجعين ✅" : "", 
         "",
-        "الشروط:",
+        ":الشروط",
         ...getBaseTerms(),
         ...getSeasonTerms().map(x=>x.text),
         "",
@@ -436,7 +436,7 @@ form.addEventListener('submit',e=>{
       noPool.checked ? "بدون مسبح ❌" : "يشمل مسبح ✅",
       `ساعات الحجز: ${hours}`, // لا يزال يظهر الوقت الصحيح هنا
       "",
-      "الشروط:",
+      ":الشروط",
       `- ${allTerms}`
     ].join('\n'); 
 
@@ -469,3 +469,4 @@ form.addEventListener('submit',e=>{
 </body>
 
 </html>
+
