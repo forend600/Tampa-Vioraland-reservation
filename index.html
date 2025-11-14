@@ -26,7 +26,7 @@ body{
   max-width:800px; margin:16px 50px; padding:20px; background:#fff; /* (تعديل) This adds side margin */
   border-radius:14px; border:3px solid var(--brand-blue);
 }
-h1{text-align:center; color:#2c3e50; font-size:26px;}
+h1{text-align:center; color:#2c3e50; font-size:26px; direction: rtl;}
 .title-underline{width:140px; height:3px; background:var(--brand-blue); margin:6px auto 12px; border-radius:2px;}
 .booking-number{color:#e53935; font-weight:bold; font-size:22px; text-align:center;}
 .info-row{margin:6px 0;}
@@ -47,7 +47,7 @@ h1{text-align:center; color:#2c3e50; font-size:26px;}
 }
 /* ===================================== */
 .season-note{color:#c62828; font-weight:bold;}
-.contract-footer{text-align:center; font-size:12px; color:#555; margin-top:18px;}
+.contract-footer{text-align:center; font-size:12px; color:#555; margin-top:18px; direction: rtl;}
 form{
   max-width:520px; margin: 18px 10px; background:#fff; /* (تعديل) This adds side margin */
   padding:16px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,.07);
@@ -190,22 +190,28 @@ function formatDate(d){
 }
 function getBaseTerms(){
   return [
-    "العربون غير مسترد",
-    "المنتجع غير مسؤول عن فقدان الأغراض الشخصية",
-    "في حال الأضرار المادية يتحمل المستأجر كافة التكاليف",
-    "يمنع التدخين داخل غرف وصالات المنتجع 🚭",
-    "يجب إبلاغ الحارس وقت الخروج لإخلاء المسؤولية",
-    "الالتزام بأوقات الدخول والخروج المحددة"
+    "• العربون غير مسترد", // Added bullet
+    "• المنتجع غير مسؤول عن فقدان الأغراض الشخصية", // Added bullet
+    "• في حال الأضرار المادية يتحمل المستأجر كافة التكاليف", // Added bullet
+    "• يمنع التدخين داخل غرف وصالات المنتجع 🚭", // Added bullet
+    "• يجب إبلاغ الحارس وقت الخروج لإخلاء المسؤولية", // Added bullet
+    "• الالتزام بأوقات الدخول والخروج المحددة" // Added bullet
   ];
 }
 function getSeasonTerms(){
   const t=[];
-  if(summer.checked)t.push({text:"الملعب الصابوني للأطفال ويتحمل المستأجر أي تلفيات في الملعب الصابوني",className:"season-note"});
-  if(winter.checked)t.push({text:"يرجى عدم إشعال النار داخل الخيمة أو على الزيل",className:"season-note"});
+  if(summer.checked)t.push({text:"• الملعب الصابوني للأطفال ويتحمل المستأجر أي تلفيات في الملعب الصابوني",className:"season-note"}); // Added bullet
+  if(winter.checked)t.push({text:"• يرجى عدم إشعال النار داخل الخيمة أو على الزيل",className:"season-note"}); // Added bullet
   return t;
 }
 function renderTerms(){
   termsList.innerHTML="";
+  // Add a style to the ul itself to remove default bullets
+  termsList.style.listStyleType = 'none'; // NEW LINE
+  termsList.style.padding = '0';         // NEW LINE (ensure no padding pushes the custom bullets)
+  termsList.style.marginRight = '0';     // NEW LINE (ensure no margin pushes the custom bullets)
+
+
   getBaseTerms().forEach(t=>{
     const li=document.createElement('li');li.textContent=t;termsList.appendChild(li);
   });
@@ -269,7 +275,7 @@ form.addEventListener('submit',e=>{
 
   contractTitle.textContent=`عقد إيجار ${resort}`;
   bookingNumberEl.textContent=`رقم الحجز: ${bookingNumber}`;
-  introTextContainer.innerHTML=`<p style="text-align:center;font-size:17px;">:أُبرم هذا العقد بين الطرفين<br>الطرف الأول: ${resort}<br>والطرف الثاني: ${name}<br>.وذلك وفقًا للشروط والأحكام الموضحة أدناه</p>`;
+  introTextContainer.innerHTML=`<p style="text-align:center;font-size:17px; direction: rtl;">أُبرم هذا العقد بين الطرفين:<br>الطرف الأول: ${resort}<br>والطرف الثاني: ${name}<br>وذلك وفقًا للشروط والأحكام الموضحة أدناه.</p>`;
   
   bookingInfo.innerHTML=`<div class="info-row"><b>اسم المستأجر:</b> ${name}</div>
   <div class="info-row"><b>العربون:</b> ${dep} ريال</div>
@@ -463,7 +469,3 @@ form.addEventListener('submit',e=>{
 </body>
 
 </html>
-
-
-
-
