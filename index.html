@@ -31,6 +31,18 @@
         .expense { color: var(--brand-red); font-weight: bold; }
         #contract { display: none; margin-top: 20px; }
         @media print { .tab-nav, .actions, form, .card, #loginOverlay { display: none !important; } .container { border: none; } }
+        .options-row { 
+    display: flex; 
+    flex-wrap: wrap; 
+    justify-content: flex-start; 
+    gap: 15px; 
+    margin-top: 10px; 
+    direction: rtl; 
+}
+.option-block { display: flex; align-items: center; gap: 5px; font-size: 14px; }
+.option-block input { width: auto; margin: 0; }
+.text-red { color: var(--brand-red); font-weight: bold; }
+.text-green { color: var(--brand-green); font-weight: bold; }
     </style>
 </head>
 <body>
@@ -164,7 +176,7 @@
 </div>
 
 <script>
-// الإعدادات والمزامنة
+// 1. الإعدادات والمزامنة
 let currentUserEmail = localStorage.getItem('thalathat_user_session') || ""; 
 let transactions = JSON.parse(localStorage.getItem('thalathat_v5_data')) || [];
 let isCurrentSaved = false;
@@ -188,6 +200,7 @@ function handleCredentialResponse(response) {
 function logout() {
     if(confirm("هل تريد تسجيل الخروج؟")) {
         localStorage.removeItem('thalathat_user_session');
+        localStorage.removeItem('thalathat_v5_data');
         location.reload();
     }
 }
@@ -234,7 +247,24 @@ function saveSystem() {
     pushToCloud();
 }
 
-// الحسابات
+// 2. إدارة التبويبات والحذف
+function openTab(evt, tabId) {
+    let contents = document.getElementsByClassName("tab-content");
+    for (let c of contents) c.classList.remove("active");
+    let btns = document.querySelectorAll(".tab-nav button");
+    for (let b of btns) b.classList.remove("active");
+    document.getElementById(tabId).classList.add("active");
+    evt.currentTarget.classList.add("active");
+}
+
+function deleteTrans(id) {
+    if(confirm("هل أنت متأكد من حذف هذه العملية؟")) {
+        transactions = transactions.filter(t => t.id != id);
+        saveSystem();
+    }
+}
+
+// 3. الحسابات والتقارير
 function renderDailyTable() {
     const tbody = document.getElementById('dailyTableBody');
     const query = (document.getElementById('searchQuery').value || "").toLowerCase();
@@ -302,7 +332,6 @@ function resetFinanceForm() {
     btn.style.background = "var(--brand-green)";
 }
 
-// التقارير
 function updateYearSelector() {
     const sel = document.getElementById('yearFilter');
     let years = transactions.map(t => new Date(t.date).getFullYear());
@@ -319,7 +348,6 @@ function renderReportTable() {
     document.getElementById('reportMainTitle').textContent = `ملخص السنة ${year}`;
     const tbody = document.getElementById('reportTableBody');
     tbody.innerHTML = '';
-    
     const months = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
     const summary = {};
     let tInc=0, tExp=0, tLoan=0, tOth=0;
@@ -345,60 +373,88 @@ function renderReportTable() {
     }
 }
 
-// العقود والتقويم
+// 4. منطق العقود
+document.getElementById('resortSelect').addEventListener('change', function() {
+    const tampaDiv = document.getElementById('tampaOptions');
+    const isTampa = (this.value === 'منتجع تامبا' || document.getElementById('bookBothResorts').checked);
+    if(tampaDiv) tampaDiv.style.display = isTampa ? 'flex' : 'none';
+});
+
+document.getElementById('bookingForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    isCurrentSaved = false; 
+    showContract(); 
+    document.getElementById('contract').scrollIntoView({ behavior: 'smooth' });
+});
+
+function showContract() {
+    const resort = document.getElementById('bookBothResorts').checked ? "المنتجعين" : document.getElementById('resortSelect').value;
+    const name = document.getElementById('customerName').value;
+    const dep = document.getElementById('deposit').value;
+    const rem = document.getElementById('remaining').value;
+    const date = document.getElementById('bookingDate').value;
+    const isOvernight = document.getElementById('overnight').checked;
+    const isNoPool = document.getElementById('noPool').checked;
+    const isWinterPeriod = document.getElementById('winterPeriod').checked;
+
+    let hours = isWinterPeriod ? (isOvernight ? "2م - 10ص" : "2م - 2ص") : (isOvernight ? "3م - 11ص" : "3م - 6ص");
+
+    document.getElementById('contract').style.display = "block";
+    document.getElementById('contractTitle').textContent = `عقد إيجار ${resort}`;
+    document.getElementById('bookingNumber').textContent = `رقم الحجز: ${Date.now().toString().slice(-6)}`;
+    
+    document.getElementById('bookingDetails').innerHTML = `
+        <div style="line-height:1.8; text-align:right;">
+            <b>المستأجر:</b> ${name}<br>
+            <b>التاريخ:</b> ${date}<br>
+            <b>المالية:</b> عربون (${dep}) | متبقي (${rem})<br>
+            <b class="text-red">ساعات الحجز:</b> ${hours} | ${isNoPool ? 'بدون مسبح' : 'بمسبح'}
+        </div>
+    `;
+
+    const list = document.getElementById('termsList');
+    let terms = ["العربون غير مسترد","يمنع التدخين تماماً","الالتزام بوقت الخروج"];
+    if(document.getElementById('winter').checked) terms.push("يمنع إشعال النار داخل الخيمة");
+    if(document.getElementById('summer').checked) terms.push("المستأجر مسؤول عن سلامة الملعب الصابوني");
+    
+    list.innerHTML = terms.map(t => `<li>${t}</li>`).join('');
+    document.getElementById('contractFooter').textContent = `إدارة: ${resort} | تحرر في: ${new Date().toLocaleDateString('ar-SA')}`;
+}
+
 function recordFinance() {
-    if(isCurrentSaved) return;
+    if(isCurrentSaved || !currentUserEmail) return;
     const resort = document.getElementById('bookBothResorts').checked ? "المنتجعين" : document.getElementById('resortSelect').value;
     const name = document.getElementById('customerName').value;
     const total = parseFloat(document.getElementById('deposit').value) + parseFloat(document.getElementById('remaining').value);
     const date = document.getElementById('bookingDate').value;
-    if(!date || isNaN(total)) return;
-    transactions.push({ id: Date.now(), date, type: 'إيجار', amount: total, desc: `حجز ${resort}: ${name}`, owner: currentUserEmail });
+    transactions.push({ id: Date.now(), date: date, type: 'إيجار', amount: total, desc: `حجز ${resort}: ${name}`, owner: currentUserEmail });
     isCurrentSaved = true;
     saveSystem();
 }
 
-function formatDateTimeForGoogle(d) {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const da = String(d.getDate()).padStart(2, '0');
-    return `${y}${m}${da}T000000/${y}${m}${da}T235959`;
-}
-
-document.getElementById('calendarICSBtn').onclick = function() {
-    recordFinance();
-    const name = document.getElementById('customerName').value;
-    const date = document.getElementById('bookingDate').value;
-    if(!date) return alert("اختر تاريخاً");
-    const dates = formatDateTimeForGoogle(new Date(date));
-    const title = encodeURIComponent(`${name} - حجز منتجع`);
-    window.open(`https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}`, '_blank');
-};
-
+// أزرار الحفظ والمشاركة داخل العقد
 document.getElementById('saveAllBtn').onclick = function() {
     recordFinance();
     html2canvas(document.getElementById('contract')).then(canvas => {
         const link = document.createElement('a');
-        link.download = `عقد.png`;
+        link.download = `عقد_${document.getElementById('customerName').value}.png`;
         link.href = canvas.toDataURL();
         link.click();
-        const msg = encodeURIComponent(`تم توثيق عقد الحجز الخاص بك`);
-        window.open(`https://wa.me/?text=${msg}`, '_blank');
+        window.open(`https://wa.me/?text=${encodeURIComponent('تم توثيق عقد الحجز الخاص بك من منتجعات ال دواس')}`, '_blank');
     });
 };
 
-function openTab(evt, tabId) {
-    let contents = document.getElementsByClassName("tab-content");
-    for (let c of contents) c.classList.remove("active");
-    let btns = document.querySelectorAll(".tab-nav button");
-    for (let b of btns) b.classList.remove("active");
-    document.getElementById(tabId).classList.add("active");
-    evt.currentTarget.classList.add("active");
-}
+document.getElementById('calendarICSBtn').onclick = function() {
+    recordFinance();
+    const date = document.getElementById('bookingDate').value.replace(/-/g, '');
+    const title = encodeURIComponent(`حجز ${document.getElementById('customerName').value}`);
+    window.open(`https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${date}/${date}`, '_blank');
+};
 
-function deleteTrans(id) { if(confirm("حذف؟")) { transactions = transactions.filter(t => t.id != id); saveSystem(); } }
-
+// بدء تشغيل النظام تلقائياً
 window.onload = loadSystem;
 </script>
 </body>
 </html>
+
