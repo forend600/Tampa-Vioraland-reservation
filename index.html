@@ -24,7 +24,39 @@
         label { display: block; margin-top: 10px; font-weight: bold; }
         input, select { width: 100%; padding: 10px; margin-top: 5px; border-radius: 8px; border: 1px solid #ccc; text-align: right; font-size: 16px; }
         .btn-primary { background: var(--brand-green); color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; cursor: pointer; margin-top: 15px; font-weight: bold; font-size: 16px; }
-        .table-wrapper { width: 100%; overflow-x: auto; margin-top: 15px; border: 1px solid #eee; }
+        .table-wrapper { 
+    width: 100%; 
+    overflow-x: auto; 
+    margin-top: 15px; 
+    -webkit-overflow-scrolling: touch; 
+}
+
+table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    background: white; 
+    table-layout: auto; /* يجعل الأعمدة تنكمش حسب المحتوى */
+}
+
+th, td { 
+    border: 1px solid #eee; 
+    padding: 6px 4px; /* تقليل الحواف لتقليل المساحة */
+    text-align: center; 
+    font-size: 12px; /* خط أصغر للموبايل */
+    white-space: nowrap; 
+}
+
+/* عمود الصافي الأخير */
+th:last-child, td:last-child {
+    background: #f9f9f9;
+    font-weight: bold;
+    border-right: 2px solid #ddd;
+}
+
+@media (max-width: 600px) {
+    th, td { font-size: 11px; padding: 4px 2px; }
+    h1 { font-size: 18px; }
+}
         table { width: 100%; border-collapse: collapse; background: white; }
         th, td { border: 1px solid #eee; padding: 10px; text-align: center; font-size: 13px; white-space: nowrap; }
         .income { color: var(--brand-green); font-weight: bold; }
@@ -454,7 +486,65 @@ document.getElementById('calendarICSBtn').onclick = function() {
 
 // بدء تشغيل النظام تلقائياً
 window.onload = loadSystem;
+    // 1. وظيفة تصدير Excel (CSV) متوافقة مع الكمبيوتر والجوال
+function exportToExcel() {
+    const table = document.getElementById("reportTable");
+    if (!table || table.rows.length <= 1) return alert("لا توجد بيانات لتصديرها");
+
+    let csv = [];
+    for (let i = 0; i < table.rows.length; i++) {
+        let row = [], cols = table.rows[i].cells;
+        for (let j = 0; j < cols.length; j++) {
+            // تنظيف البيانات من الفواصل والمسافات
+            let data = cols[j].innerText.replace(/,/g, "").trim();
+            row.push(data);
+        }
+        csv.push(row.join(","));
+    }
+
+    // إضافة BOM لدعم اللغة العربية في إكسل
+    const csvContent = "\uFEFF" + csv.join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    
+    link.setAttribute("href", url);
+    link.setAttribute("download", `تقرير_ثلاثات_${new Date().getFullYear()}.csv`);
+    document.body.appendChild(link); // ضروري لمتصفحات الجوال
+    link.click();
+    document.body.removeChild(link);
+}
+
+// 2. وظيفة تصدير صورة (PNG) للتقرير السنوي
+function exportToImage() {
+    const reportArea = document.getElementById("reportTab");
+    const actions = reportArea.querySelector('.actions');
+    
+    // إخفاء الأزرار مؤقتاً لكي لا تظهر في الصورة
+    if (actions) actions.style.visibility = 'hidden';
+
+    html2canvas(reportArea, { 
+        scale: 2, // دقة عالية
+        backgroundColor: "#fdf5e6",
+        useCORS: true,
+        width: reportArea.scrollWidth,
+        windowWidth: reportArea.scrollWidth
+    }).then(canvas => {
+        if (actions) actions.style.visibility = 'visible';
+
+        const link = document.createElement('a');
+        link.download = `تقرير_الحسابات_السنوي.png`;
+        link.href = canvas.toDataURL("image/png");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }).catch(err => {
+        if (actions) actions.style.visibility = 'visible';
+        alert("فشل إصدار الصورة؛ جرب استخدام متصفح كروم");
+    });
+}
 </script>
 </body>
 </html>
+
 
