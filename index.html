@@ -234,10 +234,11 @@ th:last-child, td:last-child {
 </div>
 
 <script>
-let currentPIN = "";
-// استبدال PIN بمتغير الإيميل وجلب الجلسة المحفوظة إن وجدت
+// 1. التعريفات الأساسية (تم دمجها ومنع التكرار)
 let currentUserEmail = localStorage.getItem('thalathat_user_session') || ""; 
+let isCurrentSaved = false;
 let transactions = JSON.parse(localStorage.getItem('thalathat_v5_data')) || [];
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyR-wiPwm-KwTFVq3zBTy8FH8NEVQyFWuRQrtrzDfNI9WRhPwStd_ITAhynDpQiIwIJ/exec";
 
 // وظيفة فك تشفير بيانات قوقل
 function parseJwt(token) {
@@ -252,52 +253,31 @@ function parseJwt(token) {
 // التعامل مع رد قوقل بعد تسجيل الدخول
 function handleCredentialResponse(response) {
     const user = parseJwt(response.credential);
-    currentUserEmail = user.email; // هذا هو المفتاح الجديد بدلاً من PIN
-    
-    // حفظ الجلسة محلياً لعدم طلب الدخول مرة أخرى
+    currentUserEmail = user.email; 
     localStorage.setItem('thalathat_user_session', currentUserEmail);
-    
     document.getElementById('loginOverlay').style.display = 'none';
     loadSystem();
 }
 
-// تعديل دالة التحميل لتبحث عن الجلسة المحفوظة
-async function loadSystem() {
-    const savedUser = localStorage.getItem('thalathat_user_session');
-    if (savedUser) {
-        currentUserEmail = savedUser;
-        document.getElementById('loginOverlay').style.display = 'none';
-    } else {
-        return; // توقف حتى يسجل الدخول
-    }
-    
-    document.getElementById('transDate').valueAsDate = new Date();
-    await pullFromCloud(); // جلب البيانات من قوقل شيت بناءً على الإيميل
-    renderDailyTable();
-    renderReportTable();
-}
-
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxBHoKhYr9U6uR58oBBLmQTsngIGu98gZtEFIiMqGL7wYtoiw6l2LjUqU4XE1XR4wnd/exec";
-
-// وظيفة دفع البيانات للسحاب
+// وظيفة دفع البيانات للسحاب (تم دمجها وإصلاحها)
 async function pushToCloud() {
-    if (!currentUserEmail) return; // منع الإرسال بدون تسجيل دخول
+    if (!currentUserEmail) return;
     try {
         await fetch(SCRIPT_URL, {
             method: 'POST',
             body: JSON.stringify({
-                userEmail: currentUserEmail, // تعريف الموظف لدى قوقل شيت
+                userEmail: currentUserEmail,
                 data: transactions
             })
         });
-        console.log("تمت المزامنة السحابية للموظف: " + currentUserEmail);
-    } catch (e) { console.error("خطأ في المزامنة"); }
+        console.log("تمت المزامنة بنجاح لـ: " + currentUserEmail);
+    } catch (e) { console.error("خطأ في المزامنة السحابية"); }
 }
 
+// وظيفة جلب البيانات من السحاب (تم إصلاح الرابط)
 async function pullFromCloud() {
     if (!currentUserEmail) return;
     try {
-        // إخبار السحاب بجلب بيانات هذا الموظف تحديداً عبر الرابط
         const response = await fetch(`${SCRIPT_URL}?userEmail=${currentUserEmail}`);
         const cloudData = await response.json();
         if (cloudData && Array.isArray(cloudData)) {
@@ -306,73 +286,28 @@ async function pullFromCloud() {
             renderDailyTable();
             renderReportTable();
         }
-    } catch (e) { console.log("لا توجد بيانات سحابية لهذا الموظف"); }
+    } catch (e) { console.log("خطأ في جلب البيانات من السحاب"); }
 }
 
-// وظيفة جلب البيانات من السحاب
-async function pullFromCloud() {
-    try {
-        const response = await fetch(SCRIPT_URL);
-        const cloudData = await response.json();
-        if (cloudData && Array.isArray(cloudData)) {
-            transactions = cloudData;
-            // حفظ محلي أيضاً لضمان السرعة
-            localStorage.setItem('thalathat_v5_data', JSON.stringify(transactions));
-            renderDailyTable();
-            renderReportTable();
-        }
-    } catch (e) { console.log("لا توجد بيانات سحابية حالياً"); }
-}
-
-// وظيفة تحديث قائمة السنوات المتاحة بناءً على البيانات المسجلة
-function updateYearSelector() {
-    const selector = document.getElementById('yearFilter');
-    if (!selector) return;
-
-    // الحصول على السنوات من البيانات المسجلة + إضافة السنة الحالية 2026 كخيار أساسي
-    let years = transactions.map(t => new Date(t.date).getFullYear());
-    years.push(new Date().getFullYear()); // إضافة 2026
-
-    // إزالة التكرار وترتيب السنوات من الأحدث للأقدم
-    const uniqueYears = [...new Set(years)].sort((a, b) => b - a);
-    
-    // حفظ السنة المختارة حالياً قبل مسح القائمة (لتجنب ضياع الاختيار)
-    const currentSelected = selector.value || new Date().getFullYear().toString();
-
-    selector.innerHTML = '';
-    uniqueYears.forEach(year => {
-        const opt = document.createElement('option');
-        opt.value = year;
-        opt.textContent = year;
-        selector.appendChild(opt);
-    });
-
-    // إرجاع الاختيار للسنة التي كانت مختارة أو السنة الحالية
-    selector.value = currentSelected;
-}
-
-// وظيفة لتحويل التاريخ لصيغة قوقل (سنة شهر يوم T ساعة دقيقة ثانية)
-function formatDateTimeForGoogle(d) {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const da = String(d.getDate()).padStart(2, '0');
-    const h = String(d.getHours()).padStart(2, '0');
-    const min = String(d.getMinutes()).padStart(2, '0');
-    return `${y}${m}${da}T${h}${min}00`;
-}
-
-function checkLogin() {
-    currentPIN = document.getElementById('pinInput').value;
-    if(!currentPIN) return alert("أدخل الرمز");
-    document.getElementById('loginOverlay').style.display = 'none';
-    loadSystem();
+async function loadSystem() {
+    const savedUser = localStorage.getItem('thalathat_user_session');
+    if (savedUser) {
+        currentUserEmail = savedUser;
+        document.getElementById('loginOverlay').style.display = 'none';
+    } else {
+        return; 
+    }
+    document.getElementById('transDate').valueAsDate = new Date();
+    await pullFromCloud(); 
+    renderDailyTable();
+    renderReportTable();
 }
 
 function saveSystem() {
     localStorage.setItem('thalathat_v5_data', JSON.stringify(transactions));
     renderDailyTable();
     renderReportTable();
-    pushToCloud(); // بمجرد الحفظ محلياً، سيتم الحفظ في قوقل أيضاً
+    pushToCloud(); 
 }
 
 /* --- نظام الفلترة والبحث --- */
@@ -382,7 +317,7 @@ function renderDailyTable() {
     const typeFilter = document.getElementById('filterType').value;
     tbody.innerHTML = '';
     
-    transactions.filter(t => t.owner === currentPIN)
+    transactions.filter(t => t.owner === currentUserEmail)
         .filter(t => (typeFilter === "الكل" || t.type === typeFilter))
         .filter(t => (t.desc.toLowerCase().includes(query) || t.type.toLowerCase().includes(query)))
         .sort((a,b) => new Date(b.date) - new Date(a.date))
@@ -437,7 +372,7 @@ function saveTransaction() {
         }
     } else {
         // وضع الإضافة الجديدة
-        transactions.push({ id: Date.now(), date, type, amount, desc, owner: currentPIN });
+        transactions.push({ id: Date.now(), date, type, amount, desc, owner: currentUserEmail });
     }
     
     saveSystem();
@@ -625,7 +560,7 @@ function renderReportTable() {
 
     // فلترة البيانات بناءً على الموظف والسنة المختارة
     const filteredData = transactions.filter(t => 
-        t.owner === currentPIN && 
+        t.owner === currentUserEmail && 
         new Date(t.date).getFullYear().toString() === selectedYear
     );
 
@@ -760,4 +695,5 @@ function exportToImage() {
 </script>
 </body>
 </html>
+
 
