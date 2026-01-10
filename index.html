@@ -605,10 +605,27 @@ document.getElementById('saveAllBtn').onclick = function() {
 };
 
 document.getElementById('calendarICSBtn').onclick = function() {
-    recordFinance();
-    const date = document.getElementById('bookingDate').value.replace(/-/g, '');
-    const title = encodeURIComponent(`حجز ${document.getElementById('customerName').value}`);
-    window.open(`https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${date}/${date}`, '_blank');
+    recordFinance(); // حفظ العملية مالياً
+    
+    const name = document.getElementById('customerName').value;
+    const dateVal = document.getElementById('bookingDate').value;
+    
+    if(!dateVal) return alert("يرجى اختيار تاريخ الحجز أولاً");
+
+    // 1. تحويل التاريخ لصيغة (الساعة 00:00 إلى 23:59) لضمان حالة "مشغول"
+    const dateStr = dateVal.replace(/-/g, '');
+    const startDate = dateStr + "T000000";
+    const endDate = dateStr + "T235959";
+    const dates = `${startDate}/${endDate}`;
+    
+    // 2. تجهيز العنوان
+    const resort = document.getElementById('bookBothResorts').checked ? "المنتجعين" : document.getElementById('resortSelect').value;
+    const title = encodeURIComponent(`حجز ${name} (${resort})`);
+
+    // 3. فتح الرابط مع إضافة trp=false (للحالة مشغول)
+    const calendarUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&trp=false&sf=true&output=chrome`;
+    
+    window.open(calendarUrl, '_blank');
 };
 
 // بدء تشغيل النظام تلقائياً
@@ -673,6 +690,7 @@ function exportToImage() {
 </script>
 </body>
 </html>
+
 
 
 
