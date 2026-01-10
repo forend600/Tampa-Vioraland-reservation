@@ -75,6 +75,7 @@ th:last-child, td:last-child {
 .option-block input { width: auto; margin: 0; }
 .text-red { color: var(--brand-red); font-weight: bold; }
 .text-green { color: var(--brand-green); font-weight: bold; }
+        .text-blue { color: #2980b9; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -266,6 +267,7 @@ async function loadSystem() {
     if (currentUserEmail) {
         document.getElementById('loginOverlay').style.display = 'none';
         document.getElementById('transDate').valueAsDate = new Date();
+document.getElementById('bookingDate').valueAsDate = new Date();
         await pullFromCloud();
         renderDailyTable();
         renderReportTable();
@@ -426,32 +428,89 @@ function showContract() {
     const dep = document.getElementById('deposit').value;
     const rem = document.getElementById('remaining').value;
     const date = document.getElementById('bookingDate').value;
+    
     const isOvernight = document.getElementById('overnight').checked;
     const isNoPool = document.getElementById('noPool').checked;
     const isWinterPeriod = document.getElementById('winterPeriod').checked;
+    const isTampaSummer = document.getElementById('summer').checked;
+    const isTampaWinter = document.getElementById('winter').checked;
 
-    let hours = isWinterPeriod ? (isOvernight ? "2م - 10ص" : "2م - 2ص") : (isOvernight ? "3م - 11ص" : "3م - 6ص");
+    // 1. منطق الحالة والألوان
+    let statusText = "";
+    let statusClass = "";
+    
+    if (!isOvernight && !isNoPool) {
+        statusText = "بدون مبيت + يشمل مسبح";
+        statusClass = "text-green";
+    } else {
+        statusText = (isOvernight ? "يشمل مبيت " : "بدون مبيت ") + (isNoPool ? "+ بدون مسبح" : "+ يشمل مسبح");
+        statusClass = "text-red";
+    }
 
+    // 2. منطق ساعات الحجز والألوان
+    let hoursText = "";
+    let hoursClass = "";
+
+    if (isWinterPeriod) {
+        if (isOvernight) {
+            hoursText = "من ٢ مساءً إلى ١٠ صباحاً";
+            hoursClass = "text-red";
+        } else {
+            hoursText = "من ٢ مساءً إلى ٢ صباحاً";
+            hoursClass = "text-blue";
+        }
+    } else {
+        if (isOvernight) {
+            hoursText = "من ٣ مساءً إلى ١١ صباحاً";
+            hoursClass = "text-red";
+        } else {
+            hoursText = "من ٣ مساءً إلى ٦ صباحاً";
+            hoursClass = "text-green";
+        }
+    }
+
+    // 3. عرض البيانات في العقد
     document.getElementById('contract').style.display = "block";
     document.getElementById('contractTitle').textContent = `عقد إيجار ${resort}`;
     document.getElementById('bookingNumber').textContent = `رقم الحجز: ${Date.now().toString().slice(-6)}`;
     
     document.getElementById('bookingDetails').innerHTML = `
-        <div style="line-height:1.8; text-align:right;">
+        <div style="line-height:2; font-size:16px;">
             <b>المستأجر:</b> ${name}<br>
+            <b>العربون:</b> ${dep} ريال | <b>المتبقي:</b> ${rem} ريال<br>
             <b>التاريخ:</b> ${date}<br>
-            <b>المالية:</b> عربون (${dep}) | متبقي (${rem})<br>
-            <b class="text-red">ساعات الحجز:</b> ${hours} | ${isNoPool ? 'بدون مسبح' : 'بمسبح'}
+            <b>الحالة:</b> <span class="${statusClass}">${statusText}</span><br>
+            <b>ساعات الحجز:</b> <span class="${hoursClass}">${hoursText}</span>
         </div>
     `;
 
+    // 4. تحديث الشروط والأحكام (العامة والخاصة)
     const list = document.getElementById('termsList');
-    let terms = ["العربون غير مسترد","يمنع التدخين تماماً","الالتزام بوقت الخروج"];
-    if(document.getElementById('winter').checked) terms.push("يمنع إشعال النار داخل الخيمة");
-    if(document.getElementById('summer').checked) terms.push("المستأجر مسؤول عن سلامة الملعب الصابوني");
+    let generalTerms = [
+        "العربون غير مسترد",
+        "المنتجع غير مسؤول عن فقدان الأغراض الشخصية",
+        "في حال الأضرار المادية يتحمل المستأجر كافة التكاليف",
+        "يمنع التدخين داخل غرف وصالات المنتجع",
+        "يجب إبلاغ الحارس وقت الخروج لإخلاء المسؤولية",
+        "الالتزام بأوقات الدخول والخروج المحددة"
+    ];
     
-    list.innerHTML = terms.map(t => `<li>${t}</li>`).join('');
-    document.getElementById('contractFooter').textContent = `إدارة: ${resort} | تحرر في: ${new Date().toLocaleDateString('ar-SA')}`;
+    // الشروط العامة بالأسود
+    let termsHtml = generalTerms.map(t => `<li style="color:black;">${t}</li>`).join('');
+    
+    // الشروط الخاصة باللون الأحمر لمنتجع تامبا
+    if (resort.includes("تامبا") || document.getElementById('bookBothResorts').checked) {
+        if (isTampaSummer) {
+            termsHtml += `<li class="text-red">الملعب الصابوني للأطفال ويتحمل المستأجر أي تلفيات في الملعب الصابوني</li>`;
+        }
+        if (isTampaWinter) {
+            termsHtml += `<li class="text-red">يرجى عدم إشعال النار داخل الخيمة أو على الزيل</li>`;
+        }
+    }
+    
+    list.innerHTML = termsHtml;
+    document.getElementById('contractFooter').textContent = `إدارة منتجعات آل دواس | تحرر بتاريخ: ${new Date().toLocaleDateString('ar-SA')}`;
+    document.getElementById('contract').scrollIntoView({ behavior: 'smooth' });
 }
 
 function recordFinance() {
@@ -509,7 +568,7 @@ function exportToExcel() {
     const link = document.createElement("a");
     
     link.setAttribute("href", url);
-    link.setAttribute("download", `تقرير_ثلاثات_${new Date().getFullYear()}.csv`);
+    link.setAttribute("download", `تقرير_المنتجع_${new Date().getFullYear()}.csv`);
     document.body.appendChild(link); // ضروري لمتصفحات الجوال
     link.click();
     document.body.removeChild(link);
@@ -546,5 +605,6 @@ function exportToImage() {
 </script>
 </body>
 </html>
+
 
 
