@@ -444,7 +444,9 @@ function showContract() {
     const dep = document.getElementById('deposit').value;
     const rem = document.getElementById('remaining').value;
     const date = document.getElementById('bookingDate').value;
-    
+    const days = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+    const bookingDateObj = new Date(date);
+    const dayName = bookingDateObj.toLocaleDateString('ar-SA', { weekday: 'long' });
     const isOvernight = document.getElementById('overnight').checked;
     const isNoPool = document.getElementById('noPool').checked;
     const isWinterPeriod = document.getElementById('winterPeriod').checked;
@@ -497,7 +499,8 @@ document.getElementById('bookingNumber').innerHTML = `<div style="color:red; fon
     document.getElementById('introText').innerHTML = `
         <p style="text-align:center; font-size:18px;">
             أُبرم هذا العقد بين الطرفين:<br>
-            <b>الطرف الأول:</b> ${resort} | <b>الطرف الثاني:</b> ${name}
+            <b>الطرف الأول:</b> ${resort}<br>
+            <b>الطرف الثاني:</b> ${name}
         </p>
     `;
     
@@ -506,6 +509,7 @@ document.getElementById('bookingNumber').innerHTML = `<div style="color:red; fon
             <b>المستأجر:</b> ${name}<br>
             <b>العربون:</b> ${dep} ريال | <b>المتبقي:</b> ${rem} ريال<br>
             <b>التاريخ:</b> ${date}<br>
+            <b>اليوم:</b> ${dayName}<br>
             <b>الحالة:</b> ${overnightSpan} | ${poolSpan}<br>
             <b>ساعات الحجز:</b> <span class="${hoursClass}" style="font-size:18px;">${hoursText}</span>
         </div>
@@ -583,6 +587,7 @@ document.getElementById('saveAllBtn').onclick = function() {
     const msg = `*عقد إيجار ${resort}*\n\n` +
                 `*المستأجر:* ${name}\n` +
                 `*التاريخ:* ${date}\n` +
+        `*اليوم:* ${dayName}\n` +
                 `*العربون:* ${dep} ريال\n` +
                 `*المتبقي:* ${rem} ريال\n` +
                 `*ساعات الحجز:* ${hours}\n\n` +
@@ -704,6 +709,7 @@ function exportToImage() {
 </script>
 </body>
 </html>
+
 
 
 
