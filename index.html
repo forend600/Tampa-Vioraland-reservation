@@ -423,7 +423,8 @@ document.getElementById('bookingForm').addEventListener('submit', function(e) {
 });
 
 function showContract() {
-    const resort = document.getElementById('bookBothResorts').checked ? "المنتجعين" : document.getElementById('resortSelect').value;
+    const isBoth = document.getElementById('bookBothResorts').checked;
+    const resort = isBoth ? "المنتجعين (تامبا وفيورالاند)" : document.getElementById('resortSelect').value;
     const name = document.getElementById('customerName').value;
     const dep = document.getElementById('deposit').value;
     const rem = document.getElementById('remaining').value;
@@ -432,84 +433,68 @@ function showContract() {
     const isOvernight = document.getElementById('overnight').checked;
     const isNoPool = document.getElementById('noPool').checked;
     const isWinterPeriod = document.getElementById('winterPeriod').checked;
-    const isTampaSummer = document.getElementById('summer').checked;
-    const isTampaWinter = document.getElementById('winter').checked;
 
-    // 1. منطق الحالة والألوان
-    let statusText = "";
-    let statusClass = "";
-    
-    if (!isOvernight && !isNoPool) {
-        statusText = "بدون مبيت + يشمل مسبح";
-        statusClass = "text-green";
+    // 1. تحديد رقم الحجز الثابت بناءً على اختيارك
+    let bookingID = "";
+    if (isBoth) {
+        bookingID = "100933";
+    } else if (resort === "منتجع تامبا") {
+        bookingID = "100117";
     } else {
-        statusText = (isOvernight ? "يشمل مبيت " : "بدون مبيت ") + (isNoPool ? "+ بدون مسبح" : "+ يشمل مسبح");
-        statusClass = "text-red";
+        bookingID = "100201";
     }
 
-    // 2. منطق ساعات الحجز والألوان
-    let hoursText = "";
-    let hoursClass = "";
+    // 2. منطق الحالة والألوان المستقلة (طلبك الثاني)
+    let overnightSpan = isOvernight ? `<span class="text-red">يشمل مبيت</span>` : `<span class="text-green">بدون مبيت</span>`;
+    let poolSpan = isNoPool ? `<span class="text-red">بدون مسبح</span>` : `<span class="text-green">يشمل مسبح</span>`;
 
-    if (isWinterPeriod) {
-        if (isOvernight) {
-            hoursText = "من ٢ مساءً إلى ١٠ صباحاً";
-            hoursClass = "text-red";
-        } else {
-            hoursText = "من ٢ مساءً إلى ٢ صباحاً";
-            hoursClass = "text-blue";
-        }
-    } else {
-        if (isOvernight) {
-            hoursText = "من ٣ مساءً إلى ١١ صباحاً";
-            hoursClass = "text-red";
-        } else {
-            hoursText = "من ٣ مساءً إلى ٦ صباحاً";
-            hoursClass = "text-green";
-        }
-    }
+    // 3. منطق الساعات
+    let hoursText = isWinterPeriod ? (isOvernight ? "من ٢ مساءً إلى ١٠ صباحاً" : "من ٢ مساءً إلى ٢ صباحاً") 
+                                   : (isOvernight ? "من ٣ مساءً إلى ١١ صباحاً" : "من ٣ مساءً إلى ٦ صباحاً");
 
-    // 3. عرض البيانات في العقد
+    // بناء واجهة العقد
     document.getElementById('contract').style.display = "block";
     document.getElementById('contractTitle').textContent = `عقد إيجار ${resort}`;
-    document.getElementById('bookingNumber').textContent = `رقم الحجز: ${Date.now().toString().slice(-6)}`;
+    
+    // رقم الحجز بالخط الأحمر العريض
+    document.getElementById('bookingNumber').innerHTML = `<span style="color:red; font-weight:bold; font-size:28px;">رقم الحجز: ${bookingID}</span>`;
+    
+    // إضافة أطراف العقد (طلبك الثالث)
+    document.getElementById('introText').innerHTML = `
+        <p style="text-align:center; font-size:18px;">
+            أُبرم هذا العقد بين الطرفين:<br>
+            <b>الطرف الأول:</b> ${resort} | <b>الطرف الثاني:</b> ${name}
+        </p>
+    `;
     
     document.getElementById('bookingDetails').innerHTML = `
         <div style="line-height:2; font-size:16px;">
             <b>المستأجر:</b> ${name}<br>
             <b>العربون:</b> ${dep} ريال | <b>المتبقي:</b> ${rem} ريال<br>
             <b>التاريخ:</b> ${date}<br>
-            <b>الحالة:</b> <span class="${statusClass}">${statusText}</span><br>
-            <b>ساعات الحجز:</b> <span class="${hoursClass}">${hoursText}</span>
+            <b>الحالة:</b> ${overnightSpan} | ${poolSpan}<br>
+            <b>ساعات الحجز:</b> <span style="font-size:18px;">${hoursText}</span>
         </div>
     `;
 
-    // 4. تحديث الشروط والأحكام (العامة والخاصة)
+    // الشروط والأحكام (العامة والخاصة)
     const list = document.getElementById('termsList');
-    let generalTerms = [
-        "العربون غير مسترد",
-        "المنتجع غير مسؤول عن فقدان الأغراض الشخصية",
-        "في حال الأضرار المادية يتحمل المستأجر كافة التكاليف",
-        "يمنع التدخين داخل غرف وصالات المنتجع",
-        "يجب إبلاغ الحارس وقت الخروج لإخلاء المسؤولية",
-        "الالتزام بأوقات الدخول والخروج المحددة"
-    ];
+    let generalTerms = ["العربون غير مسترد","المنتجع غير مسؤول عن فقدان الأغراض الشخصية","في حال الأضرار المادية يتحمل المستأجر كافة التكاليف","يمنع التدخين داخل غرف وصالات المنتجع 🚭","يجب إبلاغ الحارس وقت الخروج لإخلاء المسؤولية","الالتزام بأوقات الدخول والخروج المحددة"];
+    let termsHtml = generalTerms.map(t => `<li>${t}</li>`).join('');
     
-    // الشروط العامة بالأسود
-    let termsHtml = generalTerms.map(t => `<li style="color:black;">${t}</li>`).join('');
-    
-    // الشروط الخاصة باللون الأحمر لمنتجع تامبا
-    if (resort.includes("تامبا") || document.getElementById('bookBothResorts').checked) {
-        if (isTampaSummer) {
-            termsHtml += `<li class="text-red">الملعب الصابوني للأطفال ويتحمل المستأجر أي تلفيات في الملعب الصابوني</li>`;
-        }
-        if (isTampaWinter) {
-            termsHtml += `<li class="text-red">يرجى عدم إشعال النار داخل الخيمة أو على الزيل</li>`;
-        }
-    }
+    if (document.getElementById('summer').checked) termsHtml += `<li class="text-red">الملعب الصابوني للأطفال ويتحمل المستأجر أي تلفيات في الملعب الصابوني</li>`;
+    if (document.getElementById('winter').checked) termsHtml += `<li class="text-red">يرجى عدم إشعال النار داخل الخيمة أو على الزيل</li>`;
     
     list.innerHTML = termsHtml;
-    document.getElementById('contractFooter').textContent = `إدارة منتجعات آل دواس | تحرر بتاريخ: ${new Date().toLocaleDateString('ar-SA')}`;
+
+    // تذييل العقد (طلبك الرابع)
+    document.getElementById('contractFooter').innerHTML = `
+        <p style="text-align:center; font-weight:bold; margin-top:10px;">الرجاء الرد بكلمة موافق</p>
+        <div style="text-align:center; border-top:1px solid #eee; padding-top:10px;">
+            تحرر في: ${new Date().toLocaleDateString('ar-SA')} | إدارة ${resort}
+        </div>
+    `;
+    
     document.getElementById('contract').scrollIntoView({ behavior: 'smooth' });
 }
 
@@ -526,13 +511,68 @@ function recordFinance() {
 
 // أزرار الحفظ والمشاركة داخل العقد
 document.getElementById('saveAllBtn').onclick = function() {
-    recordFinance();
-    html2canvas(document.getElementById('contract')).then(canvas => {
+    recordFinance(); // حفظ البيانات في الحسابات أولاً
+
+    // 1. تجهيز البيانات الأساسية
+    const isBoth = document.getElementById('bookBothResorts').checked;
+    const resort = isBoth ? "المنتجعين (تامبا وفيورالاند)" : document.getElementById('resortSelect').value;
+    const name = document.getElementById('customerName').value;
+    const dep = document.getElementById('deposit').value;
+    const rem = document.getElementById('remaining').value;
+    const date = document.getElementById('bookingDate').value;
+
+    // 2. جلب ساعات الحجز (بنفس منطق العقد)
+    const isOvernight = document.getElementById('overnight').checked;
+    const isWinterPeriod = document.getElementById('winterPeriod').checked;
+    let hours = isWinterPeriod ? (isOvernight ? "من ٢ مساءً إلى ١٠ صباحاً" : "من ٢ مساءً إلى ٢ صباحاً") 
+                               : (isOvernight ? "من ٣ مساءً إلى ١١ صباحاً" : "من ٣ مساءً إلى ٦ صباحاً");
+
+    // 3. جلب شروط العقد من القائمة
+    const termsNodes = document.querySelectorAll('#termsList li');
+    let termsText = "";
+    termsNodes.forEach((node, index) => {
+        termsText += `${index + 1}- ${node.innerText}\n`;
+    });
+
+    // 4. تحديد لوكيشن المنتجع (يمكنك وضع روابط خرائط قوقل هنا)
+    let location = "";
+const isBoth = document.getElementById('bookBothResorts').checked;
+
+// إذا كان الحجز للمنتجعين معاً أو لمنتجع تامبا فقط، نستخدم الرابط رقم 4
+if (isBoth || resort === "منتجع تامبا") {
+    location = "https://maps.app.goo.gl/suBikRXpLu16FJsZA";
+} 
+// إذا كان الحجز لفيورالاند فقط، نستخدم الرابط رقم 5
+else if (resort === "منتجع فيورالاند") {
+    location = "https://maps.app.goo.gl/D2h5iLzgyCY58urL7";
+}
+
+    // 5. صياغة نص الرسالة
+    const msg = `*عقد إيجار ${resort}*\n\n` +
+                `*المستأجر:* ${name}\n` +
+                `*التاريخ:* ${date}\n` +
+                `*العربون:* ${dep} ريال\n` +
+                `*المتبقي:* ${rem} ريال\n` +
+                `*ساعات الحجز:* ${hours}\n\n` +
+                `*لوكيشن المنتجع:*\n${location}\n\n` +
+                `*شروط العقد:*\n${termsText}\n` +
+                `*الرجاء الرد بكلمة (موافق) لتوثيق العقد.*`;
+
+    // 6. تصدير الصورة وإرسال الرسالة
+    const actionsDiv = document.querySelector('.actions');
+    actionsDiv.style.display = 'none'; // إخفاء الأزرار قبل التصوير
+
+    html2canvas(document.getElementById('contract'), { scale: 2 }).then(canvas => {
+        actionsDiv.style.display = 'flex'; // إعادة إظهار الأزرار
+
+        // تحميل صورة العقد للجهاز
         const link = document.createElement('a');
-        link.download = `عقد_${document.getElementById('customerName').value}.png`;
+        link.download = `عقد_${name}.png`;
         link.href = canvas.toDataURL();
         link.click();
-        window.open(`https://wa.me/?text=${encodeURIComponent('تم توثيق عقد الحجز الخاص بك من منتجعات ال دواس')}`, '_blank');
+        
+        // فتح الواتساب بالرسالة النصية الكاملة
+        window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
     });
 };
 
@@ -605,6 +645,7 @@ function exportToImage() {
 </script>
 </body>
 </html>
+
 
 
 
