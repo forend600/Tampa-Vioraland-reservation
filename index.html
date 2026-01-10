@@ -217,17 +217,28 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyR-wiPwm-KwTFVq3zBT
 
 // فك تشفير بيانات الدخول
 function parseJwt(token) {
-    let base64Url = token.split('.')[1];
-    let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    return JSON.parse(window.atob(base64));
+    try {
+        let base64Url = token.split('.')[1];
+        let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        // استخدام decodeURIComponent لضمان عدم حدوث خطأ عند وجود أسماء عربية
+        let jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+    } catch (e) {
+        console.error("خطأ فك تشفير الهوية:", e);
+        return null;
+    }
 }
 
 function handleCredentialResponse(response) {
     const user = parseJwt(response.credential);
-    currentUserEmail = user.email;
-    localStorage.setItem('thalathat_user_session', currentUserEmail);
-    document.getElementById('loginOverlay').style.display = 'none';
-    loadSystem();
+    if (user && user.email) {
+        currentUserEmail = user.email;
+        localStorage.setItem('thalathat_user_session', currentUserEmail);
+        document.getElementById('loginOverlay').style.display = 'none';
+        loadSystem(); // تشغيل النظام فوراً
+    }
 }
 
 function logout() {
@@ -266,8 +277,12 @@ async function pullFromCloud() {
 async function loadSystem() {
     if (currentUserEmail) {
         document.getElementById('loginOverlay').style.display = 'none';
-        document.getElementById('transDate').valueAsDate = new Date();
-document.getElementById('bookingDate').valueAsDate = new Date();
+        
+        // اختيار تاريخ اليوم تلقائياً للعمليات والعقود
+        const today = new Date();
+        document.getElementById('transDate').valueAsDate = today;
+        document.getElementById('bookingDate').valueAsDate = today;
+        
         await pullFromCloud();
         renderDailyTable();
         renderReportTable();
@@ -449,8 +464,14 @@ function showContract() {
     let poolSpan = isNoPool ? `<span class="text-red">بدون مسبح</span>` : `<span class="text-green">يشمل مسبح</span>`;
 
     // 3. منطق الساعات
-    let hoursText = isWinterPeriod ? (isOvernight ? "من ٢ مساءً إلى ١٠ صباحاً" : "من ٢ مساءً إلى ٢ صباحاً") 
-                                   : (isOvernight ? "من ٣ مساءً إلى ١١ صباحاً" : "من ٣ مساءً إلى ٦ صباحاً");
+    let hoursText = "", hoursClass = "";
+    if (isWinterPeriod) {
+        hoursText = isOvernight ? "من ٢ مساءً إلى ١٠ صباحاً" : "من ٢ مساءً إلى ٢ صباحاً";
+        hoursClass = isOvernight ? "text-red" : "text-blue"; // أزرق للفترة الشتوية العادية
+    } else {
+        hoursText = isOvernight ? "من ٣ مساءً إلى ١١ صباحاً" : "من ٣ مساءً إلى ٦ صباحاً";
+        hoursClass = isOvernight ? "text-red" : "text-green"; // أخضر للساعات العامة
+    }
 
     // بناء واجهة العقد
     document.getElementById('contract').style.display = "block";
@@ -480,10 +501,12 @@ function showContract() {
     // الشروط والأحكام (العامة والخاصة)
     const list = document.getElementById('termsList');
     let generalTerms = ["العربون غير مسترد","المنتجع غير مسؤول عن فقدان الأغراض الشخصية","في حال الأضرار المادية يتحمل المستأجر كافة التكاليف","يمنع التدخين داخل غرف وصالات المنتجع 🚭","يجب إبلاغ الحارس وقت الخروج لإخلاء المسؤولية","الالتزام بأوقات الدخول والخروج المحددة"];
-    let termsHtml = generalTerms.map(t => `<li>${t}</li>`).join('');
+    let termsHtml = generalTerms.map(t => `<li style="color:black;">${t}</li>`).join('');
     
-    if (document.getElementById('summer').checked) termsHtml += `<li class="text-red">الملعب الصابوني للأطفال ويتحمل المستأجر أي تلفيات في الملعب الصابوني</li>`;
-    if (document.getElementById('winter').checked) termsHtml += `<li class="text-red">يرجى عدم إشعال النار داخل الخيمة أو على الزيل</li>`;
+    if (document.getElementById('summer').checked) 
+        termsHtml += `<li class="text-red">الملعب الصابوني للأطفال ويتحمل المستأجر أي تلفيات في الملعب الصابوني</li>`;
+    if (document.getElementById('winter').checked) 
+        termsHtml += `<li class="text-red">يرجى عدم إشعال النار داخل الخيمة أو على الزيل</li>`;
     
     list.innerHTML = termsHtml;
 
@@ -645,6 +668,7 @@ function exportToImage() {
 </script>
 </body>
 </html>
+
 
 
 
