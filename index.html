@@ -76,6 +76,32 @@ th:last-child, td:last-child {
 .text-red { color: var(--brand-red); font-weight: bold; }
 .text-green { color: var(--brand-green); font-weight: bold; }
         .text-blue { color: #2980b9; font-weight: bold; }
+
+        /* --- أضف هذا الجزء هنا لضبط الشروط --- */
+#termsList {
+    list-style: none;   /* إزالة النقاط التلقائية التي تظهر في اليسار وتسبب مشاكل في الصور */
+    padding: 0;         /* إزالة الفراغ الجانبي لتبدأ الشروط من حافة الصفحة بمحاذاة العنوان */
+    margin: 15px 0;     /* مسافة عمودية بسيطة */
+    text-align: right;
+}
+
+#termsList li {
+    white-space: nowrap; /* إجبار الشرط على البقاء في سطر واحد دون انكسار */
+    display: flex;       /* لترتيب النقطة يميناً بجانب النص مباشرة */
+    align-items: center;
+    direction: rtl;      /* اتجاه من اليمين لليسار */
+    font-size: 13px;     /* حجم خط مناسب ليناسب عرض شاشة الجوال في سطر واحد */
+    margin-bottom: 6px;  /* مسافة بسيطة بين كل شرط وآخر */
+}
+
+/* رسم نقطة يدوية تظهر دائماً في جهة اليمين في العقد وفي الصور المصدرة */
+#termsList li::before {
+    content: "•";        /* شكل النقطة */
+    color: #2c3e50;      /* لون النقطة */
+    font-weight: bold;
+    margin-left: 8px;    /* مسافة ثابتة بين النقطة وبداية النص */
+    flex-shrink: 0;      /* منع النقطة من الانكماش */
+}
     </style>
 </head>
 <body>
@@ -471,18 +497,18 @@ let hoursClass = "";
 
 if (isWinterPeriod) {
     if (isOvernight) {
-        hoursText = "من ٢ مساءً إلى ١٠ صباحاً";
+        hoursText = "من ٢ ظهراً إلى ١٠ ليلاً";
         hoursClass = "text-red"; // مبيت شتوي
     } else {
-        hoursText = "من ٢ مساءً إلى ٢ صباحاً";
+        hoursText = "من ٢ ظهراً إلى ٢ ليلاً";
         hoursClass = "text-blue"; // فترة شتوية عادية
     }
 } else {
     if (isOvernight) {
-        hoursText = "من ٣ مساءً إلى ١١ صباحاً";
+        hoursText = "من ٣ ظهراً إلى ١١ ليلاً";
         hoursClass = "text-red"; // مبيت صيفي
     } else {
-        hoursText = "من ٣ مساءً إلى ٦ صباحاً";
+        hoursText = "من ٣ ظهراً إلى ٦ ليلاً";
         hoursClass = "text-green"; // فترة صيفية عادية
     }
 }
@@ -529,10 +555,9 @@ document.getElementById('bookingNumber').innerHTML = `<div style="color:red; fon
 
     // تذييل العقد (طلبك الرابع)
     document.getElementById('contractFooter').innerHTML = `
-        <p style="text-align:center; font-weight:bold; margin-top:10px;">الرجاء الرد بكلمة موافق</p>
-        <div style="text-align:center; border-top:1px solid #eee; padding-top:10px;">
-            تحرر في: ${new Date().toLocaleDateString('ar-SA')} | إدارة ${resort}
-        </div>
+    <div style="text-align:center; border-top:2px solid #eee; padding-top:10px; margin-top:20px;">
+        تحرر في: ${new Date().toLocaleDateString('ar-SA')} | إدارة ${resort}
+    </div>
     `;
     
     document.getElementById('contract').scrollIntoView({ behavior: 'smooth' });
@@ -565,8 +590,8 @@ document.getElementById('saveAllBtn').onclick = function() {
     // 2. جلب ساعات الحجز
     const isOvernight = document.getElementById('overnight').checked;
     const isWinterPeriod = document.getElementById('winterPeriod').checked;
-    let hours = isWinterPeriod ? (isOvernight ? "من ٢ مساءً إلى ١٠ صباحاً" : "من ٢ مساءً إلى ٢ صباحاً") 
-                               : (isOvernight ? "من ٣ مساءً إلى ١١ صباحاً" : "من ٣ مساءً إلى ٦ صباحاً");
+    let hours = isWinterPeriod ? (isOvernight ? "من ٢ ظهراً إلى ١٠ ليلاً" : "من ٢ ظهراً إلى ٢ ليلاً") 
+                               : (isOvernight ? "من ٣ ظهراً إلى ١١ ليلاً" : "من ٣ ظهراً إلى ٦ ليلاً");
 
     // 3. جلب الشروط
     const termsNodes = document.querySelectorAll('#termsList li');
@@ -709,6 +734,7 @@ function exportToImage() {
 </script>
 </body>
 </html>
+
 
 
 
