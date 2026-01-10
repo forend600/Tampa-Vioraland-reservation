@@ -533,36 +533,40 @@ function recordFinance() {
 }
 
 // أزرار الحفظ والمشاركة داخل العقد
-// الجزء المصحح لزر الواتساب داخل السكريبت
+// استبدل دالة زر الواتساب بهذا الكود المصحح فقط
 document.getElementById('saveAllBtn').onclick = function() {
-    recordFinance(); 
+    recordFinance(); // حفظ البيانات مالياً لشركة ثلاثات
 
-    const isBoth = document.getElementById('bookBothResorts').checked; // تعريف وحيد هنا
+    // 1. تعريف البيانات (تعريف isBoth مرة واحدة فقط هنا)
+    const isBoth = document.getElementById('bookBothResorts').checked;
     const resort = isBoth ? "المنتجعين (تامبا وفيورالاند)" : document.getElementById('resortSelect').value;
     const name = document.getElementById('customerName').value;
     const dep = document.getElementById('deposit').value;
     const rem = document.getElementById('remaining').value;
     const date = document.getElementById('bookingDate').value;
 
+    // 2. جلب ساعات الحجز
     const isOvernight = document.getElementById('overnight').checked;
     const isWinterPeriod = document.getElementById('winterPeriod').checked;
     let hours = isWinterPeriod ? (isOvernight ? "من ٢ مساءً إلى ١٠ صباحاً" : "من ٢ مساءً إلى ٢ صباحاً") 
                                : (isOvernight ? "من ٣ مساءً إلى ١١ صباحاً" : "من ٣ مساءً إلى ٦ صباحاً");
 
+    // 3. جلب الشروط
     const termsNodes = document.querySelectorAll('#termsList li');
     let termsText = "";
     termsNodes.forEach((node, index) => {
         termsText += `${index + 1}- ${node.innerText}\n`;
     });
 
+    // 4. تحديد اللوكيشن (تم تصحيح تكرار المتغير هنا)
     let location = "";
-    // حذف تعريف isBoth المكرر هنا واستخدام التعريف العلوي
     if (isBoth || resort === "منتجع تامبا") {
         location = "https://maps.app.goo.gl/suBikRXpLu16FJsZA";
     } else if (resort === "منتجع فيورالاند") {
         location = "https://maps.app.goo.gl/D2h5iLzgyCY58urL7";
     }
 
+    // 5. صياغة الرسالة
     const msg = `*عقد إيجار ${resort}*\n\n` +
                 `*المستأجر:* ${name}\n` +
                 `*التاريخ:* ${date}\n` +
@@ -573,6 +577,7 @@ document.getElementById('saveAllBtn').onclick = function() {
                 `*شروط العقد:*\n${termsText}\n` +
                 `*الرجاء الرد بكلمة (موافق) لتوثيق العقد.*`;
 
+    // 6. تصدير الصورة وإرسال الواتساب
     const actionsDiv = document.querySelector('.actions');
     actionsDiv.style.display = 'none'; 
 
@@ -655,6 +660,7 @@ function exportToImage() {
 </script>
 </body>
 </html>
+
 
 
 
