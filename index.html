@@ -533,44 +533,36 @@ function recordFinance() {
 }
 
 // أزرار الحفظ والمشاركة داخل العقد
+// الجزء المصحح لزر الواتساب داخل السكريبت
 document.getElementById('saveAllBtn').onclick = function() {
-    recordFinance(); // حفظ البيانات في الحسابات أولاً
+    recordFinance(); 
 
-    // 1. تجهيز البيانات الأساسية
-    const isBoth = document.getElementById('bookBothResorts').checked;
+    const isBoth = document.getElementById('bookBothResorts').checked; // تعريف وحيد هنا
     const resort = isBoth ? "المنتجعين (تامبا وفيورالاند)" : document.getElementById('resortSelect').value;
     const name = document.getElementById('customerName').value;
     const dep = document.getElementById('deposit').value;
     const rem = document.getElementById('remaining').value;
     const date = document.getElementById('bookingDate').value;
 
-    // 2. جلب ساعات الحجز (بنفس منطق العقد)
     const isOvernight = document.getElementById('overnight').checked;
     const isWinterPeriod = document.getElementById('winterPeriod').checked;
     let hours = isWinterPeriod ? (isOvernight ? "من ٢ مساءً إلى ١٠ صباحاً" : "من ٢ مساءً إلى ٢ صباحاً") 
                                : (isOvernight ? "من ٣ مساءً إلى ١١ صباحاً" : "من ٣ مساءً إلى ٦ صباحاً");
 
-    // 3. جلب شروط العقد من القائمة
     const termsNodes = document.querySelectorAll('#termsList li');
     let termsText = "";
     termsNodes.forEach((node, index) => {
         termsText += `${index + 1}- ${node.innerText}\n`;
     });
 
-    // 4. تحديد لوكيشن المنتجع (يمكنك وضع روابط خرائط قوقل هنا)
     let location = "";
-const isBoth = document.getElementById('bookBothResorts').checked;
+    // حذف تعريف isBoth المكرر هنا واستخدام التعريف العلوي
+    if (isBoth || resort === "منتجع تامبا") {
+        location = "https://maps.app.goo.gl/suBikRXpLu16FJsZA";
+    } else if (resort === "منتجع فيورالاند") {
+        location = "https://maps.app.goo.gl/D2h5iLzgyCY58urL7";
+    }
 
-// إذا كان الحجز للمنتجعين معاً أو لمنتجع تامبا فقط، نستخدم الرابط رقم 4
-if (isBoth || resort === "منتجع تامبا") {
-    location = "https://maps.app.goo.gl/suBikRXpLu16FJsZA";
-} 
-// إذا كان الحجز لفيورالاند فقط، نستخدم الرابط رقم 5
-else if (resort === "منتجع فيورالاند") {
-    location = "https://maps.app.goo.gl/D2h5iLzgyCY58urL7";
-}
-
-    // 5. صياغة نص الرسالة
     const msg = `*عقد إيجار ${resort}*\n\n` +
                 `*المستأجر:* ${name}\n` +
                 `*التاريخ:* ${date}\n` +
@@ -581,20 +573,15 @@ else if (resort === "منتجع فيورالاند") {
                 `*شروط العقد:*\n${termsText}\n` +
                 `*الرجاء الرد بكلمة (موافق) لتوثيق العقد.*`;
 
-    // 6. تصدير الصورة وإرسال الرسالة
     const actionsDiv = document.querySelector('.actions');
-    actionsDiv.style.display = 'none'; // إخفاء الأزرار قبل التصوير
+    actionsDiv.style.display = 'none'; 
 
     html2canvas(document.getElementById('contract'), { scale: 2 }).then(canvas => {
-        actionsDiv.style.display = 'flex'; // إعادة إظهار الأزرار
-
-        // تحميل صورة العقد للجهاز
+        actionsDiv.style.display = 'flex'; 
         const link = document.createElement('a');
         link.download = `عقد_${name}.png`;
         link.href = canvas.toDataURL();
         link.click();
-        
-        // فتح الواتساب بالرسالة النصية الكاملة
         window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
     });
 };
@@ -668,6 +655,7 @@ function exportToImage() {
 </script>
 </body>
 </html>
+
 
 
 
