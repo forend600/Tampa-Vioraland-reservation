@@ -605,27 +605,41 @@ document.getElementById('saveAllBtn').onclick = function() {
 };
 
 document.getElementById('calendarICSBtn').onclick = function() {
-    recordFinance(); // حفظ العملية مالياً
-    
+    recordFinance(); // حفظ العملية مالياً لشركة ثلاثات
+
     const name = document.getElementById('customerName').value;
     const dateVal = document.getElementById('bookingDate').value;
     
     if(!dateVal) return alert("يرجى اختيار تاريخ الحجز أولاً");
 
-    // 1. تحويل التاريخ لصيغة (الساعة 00:00 إلى 23:59) لضمان حالة "مشغول"
+    // 1. تجهيز تواريخ البداية والنهاية (بصيغة الساعات لضمان الحالة Busy)
     const dateStr = dateVal.replace(/-/g, '');
-    const startDate = dateStr + "T000000";
-    const endDate = dateStr + "T235959";
-    const dates = `${startDate}/${endDate}`;
-    
-    // 2. تجهيز العنوان
-    const resort = document.getElementById('bookBothResorts').checked ? "المنتجعين" : document.getElementById('resortSelect').value;
-    const title = encodeURIComponent(`حجز ${name} (${resort})`);
+    const startDateString = dateStr + "T000000";
+    const endDateString = dateStr + "T235959";
 
-    // 3. فتح الرابط مع إضافة trp=false (للحالة مشغول)
-    const calendarUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&trp=false&sf=true&output=chrome`;
-    
-    window.open(calendarUrl, '_blank');
+    // 2. تجهيز المتغيرات للعنوان (تطويرك الجديد)
+    const isBoth = document.getElementById('bookBothResorts').checked;
+    const resortName = isBoth ? "المنتجعين" : document.getElementById('resortSelect').value.replace("منتجع ", "");
+    const statusOvernight = document.getElementById('overnight').checked ? "(مبيت)" : "(بدون مبيت)";
+    const statusPool = document.getElementById('noPool').checked ? "(بدون مسبح)" : "(مسبح)";
+    const statusWinter = document.getElementById('winterPeriod').checked ? "(فترة شتوية)" : "";
+
+    // 3. بناء العنوان النهائي الشامل
+    const dep = document.getElementById('deposit').value;
+    const rem = document.getElementById('remaining').value;
+    const fullTitle = `${name}، ${dep}-${rem}، (${resortName})، ${statusOvernight} ${statusPool} ${statusWinter}`.trim();
+
+    // 4. بناء الرابط باستخدام URLSearchParams لضمان الدقة
+    const params = new URLSearchParams({
+        action: 'TEMPLATE',
+        text: fullTitle, 
+        dates: `${startDateString}/${endDateString}`,
+        trp: 'false', // لضمان ظهور الحالة "مشغول" (Busy)
+        sf: 'true',
+        output: 'chrome'
+    });
+
+    window.open(`https://www.google.com/calendar/render?${params.toString()}`, '_blank');
 };
 
 // بدء تشغيل النظام تلقائياً
@@ -690,6 +704,7 @@ function exportToImage() {
 </script>
 </body>
 </html>
+
 
 
 
