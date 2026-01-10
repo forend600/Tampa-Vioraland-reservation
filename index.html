@@ -464,21 +464,34 @@ function showContract() {
     let poolSpan = isNoPool ? `<span class="text-red">بدون مسبح</span>` : `<span class="text-green">يشمل مسبح</span>`;
 
     // 3. منطق الساعات
-    let hoursText = "", hoursClass = "";
-    if (isWinterPeriod) {
-        hoursText = isOvernight ? "من ٢ مساءً إلى ١٠ صباحاً" : "من ٢ مساءً إلى ٢ صباحاً";
-        hoursClass = isOvernight ? "text-red" : "text-blue"; // أزرق للفترة الشتوية العادية
+    let hoursText = "";
+let hoursClass = "";
+
+if (isWinterPeriod) {
+    if (isOvernight) {
+        hoursText = "من ٢ مساءً إلى ١٠ صباحاً";
+        hoursClass = "text-red"; // مبيت شتوي
     } else {
-        hoursText = isOvernight ? "من ٣ مساءً إلى ١١ صباحاً" : "من ٣ مساءً إلى ٦ صباحاً";
-        hoursClass = isOvernight ? "text-red" : "text-green"; // أخضر للساعات العامة
+        hoursText = "من ٢ مساءً إلى ٢ صباحاً";
+        hoursClass = "text-blue"; // فترة شتوية عادية
     }
+} else {
+    if (isOvernight) {
+        hoursText = "من ٣ مساءً إلى ١١ صباحاً";
+        hoursClass = "text-red"; // مبيت صيفي
+    } else {
+        hoursText = "من ٣ مساءً إلى ٦ صباحاً";
+        hoursClass = "text-green"; // فترة صيفية عادية
+    }
+}
 
     // بناء واجهة العقد
     document.getElementById('contract').style.display = "block";
     document.getElementById('contractTitle').textContent = `عقد إيجار ${resort}`;
     
-    // رقم الحجز بالخط الأحمر العريض
-    document.getElementById('bookingNumber').innerHTML = `<span style="color:red; font-weight:bold; font-size:28px;">رقم الحجز: ${bookingID}</span>`;
+   // توسيط رقم الحجز وجعله بارزاً في المنتصف
+document.getElementById('bookingNumber').style.textAlign = "center";
+document.getElementById('bookingNumber').innerHTML = `<div style="color:red; font-weight:bold; font-size:28px; margin: 10px 0;">رقم الحجز: ${bookingID}</div>`;
     
     // إضافة أطراف العقد (طلبك الثالث)
     document.getElementById('introText').innerHTML = `
@@ -494,7 +507,7 @@ function showContract() {
             <b>العربون:</b> ${dep} ريال | <b>المتبقي:</b> ${rem} ريال<br>
             <b>التاريخ:</b> ${date}<br>
             <b>الحالة:</b> ${overnightSpan} | ${poolSpan}<br>
-            <b>ساعات الحجز:</b> <span style="font-size:18px;">${hoursText}</span>
+            <b>ساعات الحجز:</b> <span class="${hoursClass}" style="font-size:18px;">${hoursText}</span>
         </div>
     `;
 
@@ -660,6 +673,7 @@ function exportToImage() {
 </script>
 </body>
 </html>
+
 
 
 
