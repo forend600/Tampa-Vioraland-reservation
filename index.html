@@ -586,7 +586,8 @@ document.getElementById('saveAllBtn').onclick = function() {
     const dep = document.getElementById('deposit').value;
     const rem = document.getElementById('remaining').value;
     const date = document.getElementById('bookingDate').value;
-
+const bookingDateObj = new Date(date);
+    const dayName = bookingDateObj.toLocaleDateString('ar-SA', { weekday: 'long' });
     // 2. جلب ساعات الحجز
     const isOvernight = document.getElementById('overnight').checked;
     const isWinterPeriod = document.getElementById('winterPeriod').checked;
@@ -734,6 +735,7 @@ function exportToImage() {
 </script>
 </body>
 </html>
+
 
 
 
