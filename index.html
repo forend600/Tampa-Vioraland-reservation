@@ -610,18 +610,18 @@ const bookingDateObj = new Date(date);
     }
 
     // 5. صياغة الرسالة
-    const msg = `*عقد إيجار ${resort}*\n\n` +
-                `*المستأجر:* ${name}\n` +
-                `*التاريخ:* ${date}\n` +
-        `*اليوم:* ${dayName}\n` +
-                `*العربون:* ${dep} ريال\n` +
-                `*المتبقي:* ${rem} ريال\n` +
-                `*ساعات الحجز:* ${hours}\n\n` +
-                `*لوكيشن المنتجع:*\n${location}\n\n` +
-                `*شروط العقد:*\n${termsText}\n` +
-        `*رقم الحارس: 0567863628.*`
-                `*الرجاء الرد بكلمة (موافق) لتوثيق العقد.*`;
-
+   const msg = `*عقد إيجار ${resort}*\n\n` +
+            `*المستأجر:* ${name}\n` +
+            `*التاريخ:* ${date}\n` +
+            `*اليوم:* ${dayName}\n` +
+            `*العربون:* ${dep} ريال\n` +
+            `*المتبقي:* ${rem} ريال\n` +
+            `*ساعات الحجز:* ${hours}\n\n` +
+            `*لوكيشن المنتجع:*\n${location}\n\n` +
+            `*رقم الحارس:* 0567863628\n\n` + // السطر الجديد المضاف هنا
+            `*شروط العقد:*\n${termsText}\n` +
+            `*الرجاء الرد بكلمة (موافق) لتوثيق العقد.*`;
+    
     // 6. تصدير الصورة وإرسال الواتساب
     const actionsDiv = document.querySelector('.actions');
     actionsDiv.style.display = 'none'; 
@@ -736,6 +736,7 @@ function exportToImage() {
 </script>
 </body>
 </html>
+
 
 
 
