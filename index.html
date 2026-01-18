@@ -435,7 +435,6 @@ function renderReportTable() {
     const months = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
     const summary = {};
     
-    // تعريف متغيرات الإجمالي السنوي بما فيها الربح العام الجديد
     let tInc=0, tExp=0, tGenProf=0, tLoan=0, tOth=0;
 
     transactions.filter(t => t.owner === currentUserEmail && new Date(t.date).getFullYear().toString() === year)
@@ -450,25 +449,19 @@ function renderReportTable() {
 
     Object.keys(summary).sort((a,b) => a-b).forEach(m => {
         const s = summary[m];
-        
-        // العملية الحسابية للربح العام (الدخل ناقص المصروفات فقط)
         const generalProfit = s.inc - s.exp; 
-        
-        // الصافي النهائي (خصم كل المصاريف والالتزامات)
         const net = s.inc - (s.exp + s.loan + s.other);
         
-        // تجميع الإجماليات السنوية
-        tInc+=s.inc; 
-        tExp+=s.exp; 
-        tGenProf+=generalProfit; // إضافة الربح العام للإجمالي
-        tLoan+=s.loan; 
-        tOth+=s.other;
+        // تحديد فئة اللون للربح العام (أخضر للربح، أحمر للخسارة)
+        const genProfClass = generalProfit >= 0 ? 'income' : 'expense';
+        
+        tInc+=s.inc; tExp+=s.exp; tGenProf+=generalProfit; tLoan+=s.loan; tOth+=s.other;
 
         tbody.innerHTML += `<tr>
             <td>${months[m]}</td>
             <td class="income">${s.inc}</td>
             <td class="expense">${s.exp}</td>
-            <td style="font-weight:bold; background:#f4fbf9; color:#27ae60;">${generalProfit}</td> <td>${s.loan}</td>
+            <td class="${genProfClass}" style="font-weight:bold; background:#f4fbf9;">${generalProfit}</td> <td>${s.loan}</td>
             <td>${s.other}</td>
             <td class="${net>=0?'income':'expense'}">${net}</td>
         </tr>`;
@@ -476,12 +469,15 @@ function renderReportTable() {
 
     if(tInc+tExp > 0) {
         const totalNet = tInc - (tExp + tLoan + tOth);
+        // تحديد لون إجمالي السنة للربح العام
+        const totalGenProfClass = tGenProf >= 0 ? 'income' : 'expense';
+
         tbody.innerHTML += `
             <tr style="background:#eee; font-weight:bold;">
                 <td>الإجمالي</td>
                 <td class="income">${tInc}</td>
                 <td class="expense">${tExp}</td>
-                <td style="background:#d1f2eb; color:#1d6f42;">${tGenProf}</td> <td>${tLoan}</td>
+                <td class="${totalGenProfClass}" style="background:#d1f2eb;">${tGenProf}</td> <td>${tLoan}</td>
                 <td>${tOth}</td>
                 <td class="${totalNet>=0?'income':'expense'}">${totalNet}</td>
             </tr>`;
@@ -776,6 +772,7 @@ function exportToImage() {
 </script>
 </body>
 </html>
+
 
 
 
