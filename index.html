@@ -224,9 +224,18 @@ th:last-child, td:last-child {
     </div>
     <div class="table-wrapper">
         <table id="reportTable">
-            <thead><tr><th>الشهر</th><th>الدخل (+)</th><th>المصروفات (-)</th><th>الجمعية (-)</th><th>أخرى (-)</th><th>الصافي</th></tr></thead>
-            <tbody id="reportTableBody"></tbody>
-        </table>
+    <thead>
+        <tr>
+            <th>الشهر</th>
+            <th>الدخل (+)</th>
+            <th>المصروفات (-)</th>
+            <th style="background-color: #eef9f7; color: #27ae60;">الربح العام</th> <th>الجمعية (-)</th>
+            <th>أخرى (-)</th>
+            <th>الصافي</th>
+        </tr>
+    </thead>
+    <tbody id="reportTableBody"></tbody>
+</table>
     </div>
     <div class="actions" style="display:flex; gap:10px; margin-top:20px;">
         <button onclick="exportToExcel()" class="btn-primary" style="background:#1d6f42">تصدير Excel</button>
@@ -425,7 +434,9 @@ function renderReportTable() {
     tbody.innerHTML = '';
     const months = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
     const summary = {};
-    let tInc=0, tExp=0, tLoan=0, tOth=0;
+    
+    // تعريف متغيرات الإجمالي السنوي بما فيها الربح العام الجديد
+    let tInc=0, tExp=0, tGenProf=0, tLoan=0, tOth=0;
 
     transactions.filter(t => t.owner === currentUserEmail && new Date(t.date).getFullYear().toString() === year)
     .forEach(t => {
@@ -439,12 +450,41 @@ function renderReportTable() {
 
     Object.keys(summary).sort((a,b) => a-b).forEach(m => {
         const s = summary[m];
+        
+        // العملية الحسابية للربح العام (الدخل ناقص المصروفات فقط)
+        const generalProfit = s.inc - s.exp; 
+        
+        // الصافي النهائي (خصم كل المصاريف والالتزامات)
         const net = s.inc - (s.exp + s.loan + s.other);
-        tInc+=s.inc; tExp+=s.exp; tLoan+=s.loan; tOth+=s.other;
-        tbody.innerHTML += `<tr><td>${months[m]}</td><td class="income">${s.inc}</td><td class="expense">${s.exp}</td><td>${s.loan}</td><td>${s.other}</td><td class="${net>=0?'income':'expense'}">${net}</td></tr>`;
+        
+        // تجميع الإجماليات السنوية
+        tInc+=s.inc; 
+        tExp+=s.exp; 
+        tGenProf+=generalProfit; // إضافة الربح العام للإجمالي
+        tLoan+=s.loan; 
+        tOth+=s.other;
+
+        tbody.innerHTML += `<tr>
+            <td>${months[m]}</td>
+            <td class="income">${s.inc}</td>
+            <td class="expense">${s.exp}</td>
+            <td style="font-weight:bold; background:#f4fbf9; color:#27ae60;">${generalProfit}</td> <td>${s.loan}</td>
+            <td>${s.other}</td>
+            <td class="${net>=0?'income':'expense'}">${net}</td>
+        </tr>`;
     });
+
     if(tInc+tExp > 0) {
-        tbody.innerHTML += `<tr style="background:#eee; font-weight:bold;"><td>الإجمالي</td><td class="income">${tInc}</td><td class="expense">${tExp}</td><td>${tLoan}</td><td>${tOth}</td><td>${tInc-(tExp+tLoan+tOth)}</td></tr>`;
+        const totalNet = tInc - (tExp + tLoan + tOth);
+        tbody.innerHTML += `
+            <tr style="background:#eee; font-weight:bold;">
+                <td>الإجمالي</td>
+                <td class="income">${tInc}</td>
+                <td class="expense">${tExp}</td>
+                <td style="background:#d1f2eb; color:#1d6f42;">${tGenProf}</td> <td>${tLoan}</td>
+                <td>${tOth}</td>
+                <td class="${totalNet>=0?'income':'expense'}">${totalNet}</td>
+            </tr>`;
     }
 }
 
@@ -736,6 +776,7 @@ function exportToImage() {
 </script>
 </body>
 </html>
+
 
 
 
