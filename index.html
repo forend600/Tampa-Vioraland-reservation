@@ -533,7 +533,7 @@ let hoursClass = "";
 
 if (isWinterPeriod) {
     if (isOvernight) {
-        hoursText = "من ٢ ظهراً إلى ١٠ ليلاً";
+        hoursText = "من ٢ ظهراً إلى ١٠ صباحاً";
         hoursClass = "text-red"; // مبيت شتوي
     } else {
         hoursText = "من ٢ ظهراً إلى ٢ ليلاً";
@@ -541,7 +541,7 @@ if (isWinterPeriod) {
     }
 } else {
     if (isOvernight) {
-        hoursText = "من ٣ ظهراً إلى ١١ ليلاً";
+        hoursText = "من ٣ ظهراً إلى ١١ صباحاً";
         hoursClass = "text-red"; // مبيت صيفي
     } else {
         hoursText = "من ٣ ظهراً إلى ٦ صباحاً";
@@ -627,8 +627,8 @@ const bookingDateObj = new Date(date);
     // 2. جلب ساعات الحجز
     const isOvernight = document.getElementById('overnight').checked;
     const isWinterPeriod = document.getElementById('winterPeriod').checked;
-    let hours = isWinterPeriod ? (isOvernight ? "من ٢ ظهراً إلى ١٠ ليلاً" : "من ٢ ظهراً إلى ٢ ليلاً") 
-                               : (isOvernight ? "من ٣ ظهراً إلى ١١ ليلاً" : "من ٣ ظهراً إلى ٦ صباحاً");
+    let hours = isWinterPeriod ? (isOvernight ? "من ٢ ظهراً إلى ١٠ صباحاً" : "من ٢ ظهراً إلى ٢ ليلاً") 
+                               : (isOvernight ? "من ٣ ظهراً إلى ١١ صباحاً" : "من ٣ ظهراً إلى ٦ صباحاً");
 
     // 3. جلب الشروط
     const termsNodes = document.querySelectorAll('#termsList li');
@@ -772,6 +772,7 @@ function exportToImage() {
 </script>
 </body>
 </html>
+
 
 
 
