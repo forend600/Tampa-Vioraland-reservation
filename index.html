@@ -7,7 +7,6 @@
     <meta name="theme-color" content="#2980b9">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        /* (تبقى الأنماط CSS كما هي في كودك السابق دون تغيير) */
         *, *::before, *::after { box-sizing: border-box; }
         :root { --brand-blue: #2980b9; --brand-green: #27ae60; --brand-red: #e74c3c; --brand-gold: #f1c40f; }
         body { font-family: 'Times New Roman', Arial, Tahoma, sans-serif; direction: rtl; margin: 0; padding: 0; background: #fdf5e6; text-align: right; }
@@ -24,84 +23,27 @@
         label { display: block; margin-top: 10px; font-weight: bold; }
         input, select { width: 100%; padding: 10px; margin-top: 5px; border-radius: 8px; border: 1px solid #ccc; text-align: right; font-size: 16px; }
         .btn-primary { background: var(--brand-green); color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; cursor: pointer; margin-top: 15px; font-weight: bold; font-size: 16px; }
-        .table-wrapper { 
-    width: 100%; 
-    overflow-x: auto; 
-    margin-top: 15px; 
-    -webkit-overflow-scrolling: touch; 
-}
-
-table { 
-    width: 100%; 
-    border-collapse: collapse; 
-    background: white; 
-    table-layout: auto; /* يجعل الأعمدة تنكمش حسب المحتوى */
-}
-
-th, td { 
-    border: 1px solid #eee; 
-    padding: 6px 4px; /* تقليل الحواف لتقليل المساحة */
-    text-align: center; 
-    font-size: 12px; /* خط أصغر للموبايل */
-    white-space: nowrap; 
-}
-
-/* عمود الصافي الأخير */
-th:last-child, td:last-child {
-    background: #f9f9f9;
-    font-weight: bold;
-    border-right: 2px solid #ddd;
-}
-
-@media (max-width: 600px) {
-    th, td { font-size: 11px; padding: 4px 2px; }
-    h1 { font-size: 18px; }
-}
-        table { width: 100%; border-collapse: collapse; background: white; }
-        th, td { border: 1px solid #eee; padding: 10px; text-align: center; font-size: 13px; white-space: nowrap; }
+        .table-wrapper { width: 100%; overflow-x: auto; margin-top: 15px; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; background: white; table-layout: auto; }
+        th, td { border: 1px solid #eee; padding: 6px 4px; text-align: center; font-size: 12px; white-space: nowrap; }
+        th:last-child, td:last-child { background: #f9f9f9; font-weight: bold; border-right: 2px solid #ddd; }
+        @media (max-width: 600px) { th, td { font-size: 11px; padding: 4px 2px; } h1 { font-size: 18px; } }
         .income { color: var(--brand-green); font-weight: bold; }
         .expense { color: var(--brand-red); font-weight: bold; }
         #contract { display: none; margin-top: 20px; }
         @media print { .tab-nav, .actions, form, .card, #loginOverlay { display: none !important; } .container { border: none; } }
-        .options-row { 
-    display: flex; 
-    flex-wrap: wrap; 
-    justify-content: flex-start; 
-    gap: 15px; 
-    margin-top: 10px; 
-    direction: rtl; 
-}
-.option-block { display: flex; align-items: center; gap: 5px; font-size: 14px; }
-.option-block input { width: auto; margin: 0; }
-.text-red { color: var(--brand-red); font-weight: bold; }
-.text-green { color: var(--brand-green); font-weight: bold; }
+        .options-row { display: flex; flex-wrap: wrap; justify-content: flex-start; gap: 15px; margin-top: 10px; direction: rtl; }
+        .option-block { display: flex; align-items: center; gap: 5px; font-size: 14px; }
+        .option-block input { width: auto; margin: 0; }
+        .text-red { color: var(--brand-red); font-weight: bold; }
+        .text-green { color: var(--brand-green); font-weight: bold; }
         .text-blue { color: #2980b9; font-weight: bold; }
+        .text-gold { color: #d4af37; font-weight: bold; }
 
-        /* --- أضف هذا الجزء هنا لضبط الشروط --- */
-#termsList {
-    list-style: none;   /* إزالة النقاط التلقائية التي تظهر في اليسار وتسبب مشاكل في الصور */
-    padding: 0;         /* إزالة الفراغ الجانبي لتبدأ الشروط من حافة الصفحة بمحاذاة العنوان */
-    margin: 15px 0;     /* مسافة عمودية بسيطة */
-    text-align: right;
-}
-
-#termsList li {
-    white-space: nowrap; /* إجبار الشرط على البقاء في سطر واحد دون انكسار */
-    display: flex;       /* لترتيب النقطة يميناً بجانب النص مباشرة */
-    align-items: center;
-    direction: rtl;      /* اتجاه من اليمين لليسار */
-    font-size: 13px;     /* حجم خط مناسب ليناسب عرض شاشة الجوال في سطر واحد */
-    margin-bottom: 6px;  /* مسافة بسيطة بين كل شرط وآخر */
-}
-
-/* رسم نقطة يدوية تظهر دائماً في جهة اليمين في العقد وفي الصور المصدرة */
-#termsList li::before {
-    content: "•";        /* شكل النقطة */
-    color: #2c3e50;      /* لون النقطة */
-    font-weight: bold;
-    margin-left: 8px;    /* مسافة ثابتة بين النقطة وبداية النص */
-    flex-shrink: 0;      /* منع النقطة من الانكماش */
-}
+        /* تنسيق الشروط الجديد */
+        #termsList { list-style: none; padding: 0; margin: 15px 0; text-align: right; }
+        #termsList li { white-space: nowrap; display: flex; align-items: center; direction: rtl; font-size: 13px; margin-bottom: 6px; }
+        #termsList li::before { content: "•"; color: #2c3e50; font-weight: bold; margin-left: 8px; flex-shrink: 0; }
     </style>
 </head>
 <body>
@@ -149,6 +91,7 @@ th:last-child, td:last-child {
             <div class="option-block"><input type="checkbox" id="overnight"><label>مبيت</label></div>
             <div class="option-block"><input type="checkbox" id="noPool"><label>بدون مسبح</label></div>
             <div class="option-block"><input type="checkbox" id="winterPeriod"><label>فترة الشتوية</label></div>
+            <div class="option-block"><input type="checkbox" id="ramadanPeriod"><label style="color: #d4af37; font-weight: bold;">فترة رمضان 🌙</label></div>
         </div>
         <div id="tampaOptions" style="display:none; flex-direction: row; align-items: center; justify-content: flex-end; gap: 15px;">
             <span style="font-weight:bold;">خاص بتامبا:</span>
@@ -224,18 +167,19 @@ th:last-child, td:last-child {
     </div>
     <div class="table-wrapper">
         <table id="reportTable">
-    <thead>
-        <tr>
-            <th>الشهر</th>
-            <th>الدخل (+)</th>
-            <th>المصروفات (-)</th>
-            <th style="background-color: #eef9f7; color: #27ae60;">الربح العام</th> <th>الجمعية (-)</th>
-            <th>أخرى (-)</th>
-            <th>الصافي</th>
-        </tr>
-    </thead>
-    <tbody id="reportTableBody"></tbody>
-</table>
+            <thead>
+                <tr>
+                    <th>الشهر</th>
+                    <th>الدخل (+)</th>
+                    <th>المصروفات (-)</th>
+                    <th style="background-color: #eef9f7; color: #27ae60;">الربح العام</th> 
+                    <th>الجمعية (-)</th>
+                    <th>أخرى (-)</th>
+                    <th>الصافي</th>
+                </tr>
+            </thead>
+            <tbody id="reportTableBody"></tbody>
+        </table>
     </div>
     <div class="actions" style="display:flex; gap:10px; margin-top:20px;">
         <button onclick="exportToExcel()" class="btn-primary" style="background:#1d6f42">تصدير Excel</button>
@@ -255,7 +199,6 @@ function parseJwt(token) {
     try {
         let base64Url = token.split('.')[1];
         let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        // استخدام decodeURIComponent لضمان عدم حدوث خطأ عند وجود أسماء عربية
         let jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
             return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
         }).join(''));
@@ -272,7 +215,7 @@ function handleCredentialResponse(response) {
         currentUserEmail = user.email;
         localStorage.setItem('thalathat_user_session', currentUserEmail);
         document.getElementById('loginOverlay').style.display = 'none';
-        loadSystem(); // تشغيل النظام فوراً
+        loadSystem(); 
     }
 }
 
@@ -312,12 +255,9 @@ async function pullFromCloud() {
 async function loadSystem() {
     if (currentUserEmail) {
         document.getElementById('loginOverlay').style.display = 'none';
-        
-        // اختيار تاريخ اليوم تلقائياً للعمليات والعقود
         const today = new Date();
         document.getElementById('transDate').valueAsDate = today;
         document.getElementById('bookingDate').valueAsDate = today;
-        
         await pullFromCloud();
         renderDailyTable();
         renderReportTable();
@@ -452,7 +392,6 @@ function renderReportTable() {
         const generalProfit = s.inc - s.exp; 
         const net = s.inc - (s.exp + s.loan + s.other);
         
-        // تحديد فئة اللون للربح العام (أخضر للربح، أحمر للخسارة)
         const genProfClass = generalProfit >= 0 ? 'income' : 'expense';
         
         tInc+=s.inc; tExp+=s.exp; tGenProf+=generalProfit; tLoan+=s.loan; tOth+=s.other;
@@ -469,7 +408,6 @@ function renderReportTable() {
 
     if(tInc+tExp > 0) {
         const totalNet = tInc - (tExp + tLoan + tOth);
-        // تحديد لون إجمالي السنة للربح العام
         const totalGenProfClass = tGenProf >= 0 ? 'income' : 'expense';
 
         tbody.innerHTML += `
@@ -506,58 +444,51 @@ function showContract() {
     const dep = document.getElementById('deposit').value;
     const rem = document.getElementById('remaining').value;
     const date = document.getElementById('bookingDate').value;
-    const days = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+    
+    // استخراج اليوم
     const bookingDateObj = new Date(date);
     const dayName = bookingDateObj.toLocaleDateString('ar-SA', { weekday: 'long' });
+
     const isOvernight = document.getElementById('overnight').checked;
     const isNoPool = document.getElementById('noPool').checked;
     const isWinterPeriod = document.getElementById('winterPeriod').checked;
+    const isRamadan = document.getElementById('ramadanPeriod').checked;
 
-    // 1. تحديد رقم الحجز الثابت بناءً على اختيارك
-    let bookingID = "";
-    if (isBoth) {
-        bookingID = "100933";
-    } else if (resort === "منتجع تامبا") {
-        bookingID = "100117";
-    } else {
-        bookingID = "100201";
-    }
+    // 1. تحديد رقم الحجز الثابت
+    let bookingID = isBoth ? "100933" : (resort === "منتجع تامبا" ? "100117" : "100201");
 
-    // 2. منطق الحالة والألوان المستقلة (طلبك الثاني)
+    // 2. منطق الحالة والألوان
     let overnightSpan = isOvernight ? `<span class="text-red">يشمل مبيت</span>` : `<span class="text-green">بدون مبيت</span>`;
     let poolSpan = isNoPool ? `<span class="text-red">بدون مسبح</span>` : `<span class="text-green">يشمل مسبح</span>`;
 
-    // 3. منطق الساعات
+    // 3. منطق الساعات والألوان (الأولوية لرمضان)
     let hoursText = "";
-let hoursClass = "";
+    let hoursClass = "";
 
-if (isWinterPeriod) {
-    if (isOvernight) {
-        hoursText = "من ٢ ظهراً إلى ١٠ صباحاً";
-        hoursClass = "text-red"; // مبيت شتوي
+    if (isRamadan) {
+        if (isOvernight) {
+            hoursText = "من ٩ مساءً إلى ٩ صباحاً";
+            hoursClass = "text-red";
+        } else {
+            hoursText = "من ٩ مساءً إلى ٣ صباحاً";
+            hoursClass = "text-gold";
+        }
+    } else if (isWinterPeriod) {
+        hoursText = isOvernight ? "من ٢ ظهراً إلى ١٠ صباحاً" : "من ٢ ظهراً إلى ٢ ليلاً";
+        hoursClass = isOvernight ? "text-red" : "text-blue";
     } else {
-        hoursText = "من ٢ ظهراً إلى ٢ ليلاً";
-        hoursClass = "text-blue"; // فترة شتوية عادية
+        hoursText = isOvernight ? "من ٣ ظهراً إلى ١١ صباحاً" : "من ٣ ظهراً إلى ٦ صباحاً";
+        hoursClass = isOvernight ? "text-red" : "text-green";
     }
-} else {
-    if (isOvernight) {
-        hoursText = "من ٣ ظهراً إلى ١١ صباحاً";
-        hoursClass = "text-red"; // مبيت صيفي
-    } else {
-        hoursText = "من ٣ ظهراً إلى ٦ صباحاً";
-        hoursClass = "text-green"; // فترة صيفية عادية
-    }
-}
 
     // بناء واجهة العقد
     document.getElementById('contract').style.display = "block";
     document.getElementById('contractTitle').textContent = `عقد إيجار ${resort}`;
     
-   // توسيط رقم الحجز وجعله بارزاً في المنتصف
-document.getElementById('bookingNumber').style.textAlign = "center";
-document.getElementById('bookingNumber').innerHTML = `<div style="color:red; font-weight:bold; font-size:28px; margin: 10px 0;">رقم الحجز: ${bookingID}</div>`;
+    // توسيط رقم الحجز
+    document.getElementById('bookingNumber').style.textAlign = "center";
+    document.getElementById('bookingNumber').innerHTML = `<div style="color:red; font-weight:bold; font-size:28px; margin: 10px 0;">رقم الحجز: ${bookingID}</div>`;
     
-    // إضافة أطراف العقد (طلبك الثالث)
     document.getElementById('introText').innerHTML = `
         <p style="text-align:center; font-size:18px;">
             أُبرم هذا العقد بين الطرفين:<br>
@@ -565,7 +496,7 @@ document.getElementById('bookingNumber').innerHTML = `<div style="color:red; fon
             <b>الطرف الثاني:</b> ${name}
         </p>
     `;
-    
+
     document.getElementById('bookingDetails').innerHTML = `
         <div style="line-height:2; font-size:16px;">
             <b>المستأجر:</b> ${name}<br>
@@ -577,7 +508,7 @@ document.getElementById('bookingNumber').innerHTML = `<div style="color:red; fon
         </div>
     `;
 
-    // الشروط والأحكام (العامة والخاصة)
+    // الشروط والأحكام
     const list = document.getElementById('termsList');
     let generalTerms = ["العربون غير مسترد","المنتجع غير مسؤول عن فقدان الأغراض الشخصية","في حال الأضرار المادية يتحمل المستأجر كافة التكاليف","يمنع التدخين داخل غرف وصالات المنتجع 🚭","يجب إبلاغ الحارس وقت الخروج لإخلاء المسؤولية","الالتزام بأوقات الدخول والخروج المحددة"];
     let termsHtml = generalTerms.map(t => `<li style="color:black;">${t}</li>`).join('');
@@ -589,7 +520,7 @@ document.getElementById('bookingNumber').innerHTML = `<div style="color:red; fon
     
     list.innerHTML = termsHtml;
 
-    // تذييل العقد (طلبك الرابع)
+    // تذييل العقد
     document.getElementById('contractFooter').innerHTML = `
     <div style="text-align:center; border-top:2px solid #eee; padding-top:10px; margin-top:20px;">
         تحرر في: ${new Date().toLocaleDateString('ar-SA')} | إدارة ${resort}
@@ -610,34 +541,38 @@ function recordFinance() {
     saveSystem();
 }
 
-// أزرار الحفظ والمشاركة داخل العقد
-// استبدل دالة زر الواتساب بهذا الكود المصحح فقط
+// أزرار الحفظ والمشاركة
 document.getElementById('saveAllBtn').onclick = function() {
-    recordFinance(); // حفظ البيانات مالياً لشركة ثلاثات
+    recordFinance(); 
 
-    // 1. تعريف البيانات (تعريف isBoth مرة واحدة فقط هنا)
     const isBoth = document.getElementById('bookBothResorts').checked;
     const resort = isBoth ? "المنتجعين (تامبا وفيورالاند)" : document.getElementById('resortSelect').value;
     const name = document.getElementById('customerName').value;
     const dep = document.getElementById('deposit').value;
     const rem = document.getElementById('remaining').value;
     const date = document.getElementById('bookingDate').value;
-const bookingDateObj = new Date(date);
+    const bookingDateObj = new Date(date);
     const dayName = bookingDateObj.toLocaleDateString('ar-SA', { weekday: 'long' });
-    // 2. جلب ساعات الحجز
+    
     const isOvernight = document.getElementById('overnight').checked;
     const isWinterPeriod = document.getElementById('winterPeriod').checked;
-    let hours = isWinterPeriod ? (isOvernight ? "من ٢ ظهراً إلى ١٠ صباحاً" : "من ٢ ظهراً إلى ٢ ليلاً") 
-                               : (isOvernight ? "من ٣ ظهراً إلى ١١ صباحاً" : "من ٣ ظهراً إلى ٦ صباحاً");
+    const isRamadan = document.getElementById('ramadanPeriod').checked;
+    let hours = "";
 
-    // 3. جلب الشروط
+    if (isRamadan) {
+        hours = isOvernight ? "من ٩ مساءً إلى ٩ صباحاً" : "من ٩ مساءً إلى ٣ صباحاً";
+    } else if (isWinterPeriod) {
+        hours = isOvernight ? "من ٢ ظهراً إلى ١٠ صباحاً" : "من ٢ ظهراً إلى ٢ ليلاً";
+    } else {
+        hours = isOvernight ? "من ٣ ظهراً إلى ١١ صباحاً" : "من ٣ ظهراً إلى ٦ صباحاً";
+    }
+
     const termsNodes = document.querySelectorAll('#termsList li');
     let termsText = "";
     termsNodes.forEach((node, index) => {
         termsText += `${index + 1}- ${node.innerText}\n`;
     });
 
-    // 4. تحديد اللوكيشن (تم تصحيح تكرار المتغير هنا)
     let location = "";
     if (isBoth || resort === "منتجع تامبا") {
         location = "https://maps.app.goo.gl/suBikRXpLu16FJsZA";
@@ -645,20 +580,18 @@ const bookingDateObj = new Date(date);
         location = "https://maps.app.goo.gl/D2h5iLzgyCY58urL7";
     }
 
-    // 5. صياغة الرسالة
-   const msg = `*عقد إيجار ${resort}*\n\n` +
-            `*المستأجر:* ${name}\n` +
-            `*التاريخ:* ${date}\n` +
-            `*اليوم:* ${dayName}\n` +
-            `*العربون:* ${dep} ريال\n` +
-            `*المتبقي:* ${rem} ريال\n` +
-            `*ساعات الحجز:* ${hours}\n\n` +
-            `*لوكيشن المنتجع:*\n${location}\n\n` +
-            `*رقم الحارس:* 0567863628\n\n` + // السطر الجديد المضاف هنا
-            `*شروط العقد:*\n${termsText}\n` +
-            `*الرجاء الرد بكلمة (موافق) لتوثيق العقد.*`;
+    const msg = `*عقد إيجار ${resort}*\n\n` +
+                `*المستأجر:* ${name}\n` +
+                `*التاريخ:* ${date}\n` +
+                `*اليوم:* ${dayName}\n` +
+                `*العربون:* ${dep} ريال\n` +
+                `*المتبقي:* ${rem} ريال\n` +
+                `*ساعات الحجز:* ${hours}\n\n` +
+                `*لوكيشن المنتجع:*\n${location}\n\n` +
+                `*رقم الحارس:* 0567863628\n\n` +
+                `*شروط العقد:*\n${termsText}\n` +
+                `*الرجاء الرد بكلمة (موافق) لتوثيق العقد.*`;
     
-    // 6. تصدير الصورة وإرسال الواتساب
     const actionsDiv = document.querySelector('.actions');
     actionsDiv.style.display = 'none'; 
 
@@ -673,36 +606,32 @@ const bookingDateObj = new Date(date);
 };
 
 document.getElementById('calendarICSBtn').onclick = function() {
-    recordFinance(); // حفظ العملية مالياً لشركة ثلاثات
+    recordFinance(); 
 
     const name = document.getElementById('customerName').value;
     const dateVal = document.getElementById('bookingDate').value;
     
     if(!dateVal) return alert("يرجى اختيار تاريخ الحجز أولاً");
 
-    // 1. تجهيز تواريخ البداية والنهاية (بصيغة الساعات لضمان الحالة Busy)
     const dateStr = dateVal.replace(/-/g, '');
     const startDateString = dateStr + "T000000";
     const endDateString = dateStr + "T235959";
 
-    // 2. تجهيز المتغيرات للعنوان (تطويرك الجديد)
     const isBoth = document.getElementById('bookBothResorts').checked;
     const resortName = isBoth ? "المنتجعين" : document.getElementById('resortSelect').value.replace("منتجع ", "");
     const statusOvernight = document.getElementById('overnight').checked ? "(مبيت)" : "(بدون مبيت)";
     const statusPool = document.getElementById('noPool').checked ? "(بدون مسبح)" : "(مسبح)";
     const statusWinter = document.getElementById('winterPeriod').checked ? "(فترة شتوية)" : "";
 
-    // 3. بناء العنوان النهائي الشامل
     const dep = document.getElementById('deposit').value;
     const rem = document.getElementById('remaining').value;
     const fullTitle = `${name}، ${dep}-${rem}، (${resortName})، ${statusOvernight} ${statusPool} ${statusWinter}`.trim();
 
-    // 4. بناء الرابط باستخدام URLSearchParams لضمان الدقة
     const params = new URLSearchParams({
         action: 'TEMPLATE',
         text: fullTitle, 
         dates: `${startDateString}/${endDateString}`,
-        trp: 'false', // لضمان ظهور الحالة "مشغول" (Busy)
+        trp: 'false', 
         sf: 'true',
         output: 'chrome'
     });
@@ -712,7 +641,7 @@ document.getElementById('calendarICSBtn').onclick = function() {
 
 // بدء تشغيل النظام تلقائياً
 window.onload = loadSystem;
-    // 1. وظيفة تصدير Excel (CSV) متوافقة مع الكمبيوتر والجوال
+
 function exportToExcel() {
     const table = document.getElementById("reportTable");
     if (!table || table.rows.length <= 1) return alert("لا توجد بيانات لتصديرها");
@@ -721,14 +650,12 @@ function exportToExcel() {
     for (let i = 0; i < table.rows.length; i++) {
         let row = [], cols = table.rows[i].cells;
         for (let j = 0; j < cols.length; j++) {
-            // تنظيف البيانات من الفواصل والمسافات
             let data = cols[j].innerText.replace(/,/g, "").trim();
             row.push(data);
         }
         csv.push(row.join(","));
     }
 
-    // إضافة BOM لدعم اللغة العربية في إكسل
     const csvContent = "\uFEFF" + csv.join("\n");
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -736,21 +663,19 @@ function exportToExcel() {
     
     link.setAttribute("href", url);
     link.setAttribute("download", `تقرير_المنتجع_${new Date().getFullYear()}.csv`);
-    document.body.appendChild(link); // ضروري لمتصفحات الجوال
+    document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 }
 
-// 2. وظيفة تصدير صورة (PNG) للتقرير السنوي
 function exportToImage() {
     const reportArea = document.getElementById("reportTab");
     const actions = reportArea.querySelector('.actions');
     
-    // إخفاء الأزرار مؤقتاً لكي لا تظهر في الصورة
     if (actions) actions.style.visibility = 'hidden';
 
     html2canvas(reportArea, { 
-        scale: 2, // دقة عالية
+        scale: 2, 
         backgroundColor: "#fdf5e6",
         useCORS: true,
         width: reportArea.scrollWidth,
@@ -772,22 +697,3 @@ function exportToImage() {
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
