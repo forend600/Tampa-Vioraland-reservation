@@ -467,10 +467,10 @@ function showContract() {
 
     if (isRamadan) {
         if (isOvernight) {
-            hoursText = "من ٩ مساءً إلى ٩ صباحاً";
+            hoursText = "من ٤ عصراَ إلى ١١ صباحاً";
             hoursClass = "text-red";
         } else {
-            hoursText = "من ٩ مساءً إلى ٣ صباحاً";
+            hoursText = "من ٤ عصراً إلى ٥ فحراً";
             hoursClass = "text-gold";
         }
     } else if (isWinterPeriod) {
@@ -560,7 +560,7 @@ document.getElementById('saveAllBtn').onclick = function() {
     let hours = "";
 
     if (isRamadan) {
-        hours = isOvernight ? "من ٩ مساءً إلى ٩ صباحاً" : "من ٩ مساءً إلى ٣ صباحاً";
+        hours = isOvernight ? "من ٤ عصراً إلى ١١ صباحاً" : "من ٤ عصراً إلى ٥ فجراً";
     } else if (isWinterPeriod) {
         hours = isOvernight ? "من ٢ ظهراً إلى ١٠ صباحاً" : "من ٢ ظهراً إلى ٢ ليلاً";
     } else {
@@ -697,3 +697,4 @@ function exportToImage() {
 </script>
 </body>
 </html>
+
