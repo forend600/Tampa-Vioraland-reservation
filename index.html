@@ -92,6 +92,7 @@
             <div class="option-block"><input type="checkbox" id="noPool"><label>بدون مسبح</label></div>
             <div class="option-block"><input type="checkbox" id="winterPeriod"><label>فترة الشتوية</label></div>
             <div class="option-block"><input type="checkbox" id="ramadanPeriod"><label style="color: #d4af37; font-weight: bold;">فترة رمضان 🌙</label></div>
+            <div class="option-block"><input type="checkbox" id="twelveHours"><label class="text-blue">١٢ ساعة</label></div>
         </div>
         <div id="tampaOptions" style="display:none; flex-direction: row; align-items: center; justify-content: flex-end; gap: 15px;">
             <span style="font-weight:bold;">خاص بتامبا:</span>
@@ -453,6 +454,7 @@ function showContract() {
     const isNoPool = document.getElementById('noPool').checked;
     const isWinterPeriod = document.getElementById('winterPeriod').checked;
     const isRamadan = document.getElementById('ramadanPeriod').checked;
+    const isTwelveHours = document.getElementById('twelveHours').checked;
 
     // 1. تحديد رقم الحجز الثابت
     let bookingID = isBoth ? "100933" : (resort === "منتجع تامبا" ? "100117" : "100201");
@@ -465,15 +467,18 @@ function showContract() {
     let hoursText = "";
     let hoursClass = "";
 
-    if (isRamadan) {
-        if (isOvernight) {
-            hoursText = "من ٤ عصراَ إلى ١١ صباحاً";
-            hoursClass = "text-red";
-        } else {
-            hoursText = "من ٤ عصراً إلى ٥ فجراً";
-            hoursClass = "text-gold";
-        }
-    } else if (isWinterPeriod) {
+    if (isTwelveHours) {
+    hoursText = "من ٣ عصراً إلى ٣ فجراً";
+    hoursClass = "text-blue";
+} else if (isRamadan) {
+    if (isOvernight) {
+        hoursText = "من ٤ عصراً إلى ١١ صباحاً";
+        hoursClass = "text-red";
+    } else {
+        hoursText = "من ٤ عصراً إلى ٥ فجراً";
+        hoursClass = "text-gold";
+    }
+} else if (isWinterPeriod) {
         hoursText = isOvernight ? "من ٢ ظهراً إلى ١٠ صباحاً" : "من ٢ ظهراً إلى ٢ ليلاً";
         hoursClass = isOvernight ? "text-red" : "text-blue";
     } else {
@@ -557,12 +562,14 @@ document.getElementById('saveAllBtn').onclick = function() {
     const isOvernight = document.getElementById('overnight').checked;
     const isWinterPeriod = document.getElementById('winterPeriod').checked;
     const isRamadan = document.getElementById('ramadanPeriod').checked;
+    const isTwelveHours = document.getElementById('twelveHours').checked;
     let hours = "";
 
-    if (isRamadan) {
-        hours = isOvernight ? "من ٤ عصراً إلى ١١ صباحاً" : "من ٤ عصراً إلى ٥ فجراً";
-    } else if (isWinterPeriod) {
-        hours = isOvernight ? "من ٢ ظهراً إلى ١٠ صباحاً" : "من ٢ ظهراً إلى ٢ ليلاً";
+    if (isTwelveHours) {
+    hours = "من ٣ عصراً إلى ٣ فجراً";
+} else if (isRamadan) {
+    hours = isOvernight ? "من ٤ عصراً إلى ١١ صباحاً" : "من ٤ عصراً إلى ٥ فجراً";
+} else if (isWinterPeriod) {        hours = isOvernight ? "من ٢ ظهراً إلى ١٠ صباحاً" : "من ٢ ظهراً إلى ٢ ليلاً";
     } else {
         hours = isOvernight ? "من ٣ ظهراً إلى ١١ صباحاً" : "من ٣ ظهراً إلى ٦ صباحاً";
     }
