@@ -218,6 +218,11 @@ function openTermsModal() {
 
 function closeTermsModal() {
     document.getElementById('termsModalOverlay').style.display = 'none';
+    
+    // تحديث العقد تلقائياً إذا كان معروضاً بالفعل على الشاشة
+    if (document.getElementById('contract').style.display === 'block') {
+        showContract();
+    }
 }
 
 function renderCustomTerms() {
