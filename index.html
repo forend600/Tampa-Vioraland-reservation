@@ -58,6 +58,18 @@
     </div>
     <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-shape="rectangular"></div>
 </div>
+    <div id="termsModalOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:3000; align-items:center; justify-content:center; direction:rtl;">
+    <div class="card" style="width:90%; max-width:500px; max-height:80vh; overflow-y:auto; background:#fff; padding:20px; border-radius:10px;">
+        <h2 style="text-align:center; color:var(--brand-blue); margin-top:0;">إدارة الشروط الإضافية</h2>
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <input type="text" id="newCustomTerm" placeholder="اكتب الشرط الجديد هنا..." style="margin:0;">
+            <button type="button" onclick="addCustomTerm()" class="btn-primary" style="width:auto; margin:0; padding:10px 20px;">إضافة</button>
+        </div>
+        <div id="customTermsContainer" style="display:flex; flex-direction:column; gap:10px;">
+            </div>
+        <button type="button" onclick="closeTermsModal()" class="btn-primary" style="background:var(--brand-green); margin-top:20px;">حفظ وإغلاق</button>
+    </div>
+</div>
 
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 
@@ -99,6 +111,7 @@
             <div class="option-block"><input type="checkbox" id="summer"><label for="summer">صيف</label></div>
             <div class="option-block"><input type="checkbox" id="winter"><label for="winter">شتاء</label></div>
         </div>
+        <button type="button" class="btn-primary" style="background: var(--brand-blue); margin-top: 10px;" onclick="openTermsModal()">إدارة الشروط الإضافية 📋</button>
         <button type="submit" class="btn-primary">عرض العقد</button>
     </form>
 
@@ -194,6 +207,81 @@ let currentUserEmail = localStorage.getItem('thalathat_user_session') || "";
 let transactions = JSON.parse(localStorage.getItem('thalathat_v5_data')) || [];
 let isCurrentSaved = false;
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyR-wiPwm-KwTFVq3zBTy8FH8NEVQyFWuRQrtrzDfNI9WRhPwStd_ITAhynDpQiIwIJ/exec";
+
+    // --- دوال إدارة الشروط الإضافية ---
+let customTerms = JSON.parse(localStorage.getItem('thalathat_custom_terms')) || [];
+
+function openTermsModal() {
+    renderCustomTerms();
+    document.getElementById('termsModalOverlay').style.display = 'flex';
+}
+
+function closeTermsModal() {
+    document.getElementById('termsModalOverlay').style.display = 'none';
+}
+
+function renderCustomTerms() {
+    // حفظ ما تم تحديده لتجنب مسحه عند التحديث
+    const checkedIds = Array.from(document.querySelectorAll('.term-checkbox:checked')).map(cb => cb.value);
+    
+    const container = document.getElementById('customTermsContainer');
+    container.innerHTML = '';
+    customTerms.forEach((term) => {
+        const isChecked = checkedIds.includes(term.id.toString()) ? 'checked' : '';
+        container.innerHTML += `
+            <div style="display:flex; align-items:center; justify-content:space-between; background:#f9f9f9; padding:10px; border-radius:8px; border:1px solid #eee;">
+                <div style="display:flex; align-items:center; gap:10px; flex:1;">
+                    <input type="checkbox" class="term-checkbox" value="${term.id}" id="term_${term.id}" ${isChecked} style="width:auto; margin:0; transform:scale(1.2);">
+                    <label for="term_${term.id}" style="margin:0; font-weight:normal; font-size:14px; cursor:pointer;">${term.text}</label>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <span onclick="editCustomTerm(${term.id})" style="cursor:pointer;" title="تعديل">✏️</span>
+                    <span onclick="deleteCustomTerm(${term.id})" style="cursor:pointer;" title="حذف">🗑️</span>
+                </div>
+            </div>
+        `;
+    });
+}
+
+function addCustomTerm() {
+    const input = document.getElementById('newCustomTerm');
+    const text = input.value.trim();
+    if(text) {
+        customTerms.push({ id: Date.now(), text: text });
+        localStorage.setItem('thalathat_custom_terms', JSON.stringify(customTerms));
+        input.value = '';
+        renderCustomTerms();
+    }
+}
+
+function deleteCustomTerm(id) {
+    if(confirm("هل تريد حذف هذا الشرط نهائياً؟")) {
+        customTerms = customTerms.filter(t => t.id !== id);
+        localStorage.setItem('thalathat_custom_terms', JSON.stringify(customTerms));
+        renderCustomTerms();
+    }
+}
+
+function editCustomTerm(id) {
+    const term = customTerms.find(t => t.id === id);
+    const newText = prompt("تعديل الشرط:", term.text);
+    if(newText !== null && newText.trim() !== "") {
+        term.text = newText.trim();
+        localStorage.setItem('thalathat_custom_terms', JSON.stringify(customTerms));
+        renderCustomTerms();
+    }
+}
+
+// دالة جلب الشروط التي تم وضع (صح) عليها
+function getSelectedCustomTerms() {
+    const checkboxes = document.querySelectorAll('.term-checkbox:checked');
+    let selectedTexts = [];
+    checkboxes.forEach(cb => {
+        const term = customTerms.find(t => t.id == cb.value);
+        if(term) selectedTexts.push(term.text);
+    });
+    return selectedTexts;
+}
 
 // فك تشفير بيانات الدخول
 function parseJwt(token) {
@@ -522,6 +610,12 @@ function showContract() {
         termsHtml += `<li class="text-red">الملعب الصابوني للأطفال ويتحمل المستأجر أي تلفيات في الملعب الصابوني</li>`;
     if (document.getElementById('winter').checked) 
         termsHtml += `<li class="text-red">يرجى عدم إشعال النار داخل الخيمة أو على الزيل</li>`;
+    
+    // إضافة الشروط الخاصة التي حددها الموظف من النافذة
+    const selectedCustomTerms = getSelectedCustomTerms();
+    selectedCustomTerms.forEach(t => {
+        termsHtml += `<li class="text-blue">${t}</li>`;
+    });
     
     list.innerHTML = termsHtml;
 
