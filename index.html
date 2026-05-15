@@ -86,6 +86,11 @@
             <option value="منتجع فيورالاند">منتجع فيورالاند</option>
         </select>
         <div class="options-row"><div class="option-block"><input type="checkbox" id="bookBothResorts"><label>حجز المنتجعين معاً</label></div></div>
+        <label>رقم العقد:</label>
+        <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+            <input type="text" id="manualBookingID" readonly style="margin-top: 0; background: #f9f9f9; color: #555; font-weight: bold;">
+            <button type="button" onclick="enableEditBookingID()" style="background: var(--brand-gold); color: #000; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 0;">تعديل ✏️</button>
+        </div>
         <label>اسم المستأجر:</label>
         <input type="text" id="customerName" required>
         <label>العربون:</label>
@@ -707,12 +712,31 @@ function renderReportTable() {
 }
 
 // 4. منطق العقود
+function generateDefaultBookingID() {
+    const isBoth = document.getElementById('bookBothResorts').checked;
+    const resort = document.getElementById('resortSelect').value;
+    const input = document.getElementById('manualBookingID');
+    if (input && input.readOnly) {
+        input.value = isBoth ? "100933" : (resort === "منتجع تامبا" ? "100117" : (resort === "منتجع فيورالاند" ? "100201" : ""));
+    }
+}
+
+function enableEditBookingID() {
+    const input = document.getElementById('manualBookingID');
+    if(input) {
+        input.readOnly = false;
+        input.style.background = "#fff";
+        input.style.color = "#000";
+        input.focus();
+    }
+}
 document.getElementById('resortSelect').addEventListener('change', function() {
     const tampaDiv = document.getElementById('tampaOptions');
     const isTampa = (this.value === 'منتجع تامبا' || document.getElementById('bookBothResorts').checked);
     if(tampaDiv) tampaDiv.style.display = isTampa ? 'flex' : 'none';
+    generateDefaultBookingID();
 });
-
+document.getElementById('bookBothResorts').addEventListener('change', generateDefaultBookingID);
 document.getElementById('bookingForm').addEventListener('submit', function(e) {
     e.preventDefault();
     e.stopPropagation();
@@ -740,8 +764,7 @@ function showContract() {
     const isTwelveHours = document.getElementById('twelveHours').checked;
 
     // 1. تحديد رقم الحجز الثابت
-    let bookingID = isBoth ? "100933" : (resort === "منتجع تامبا" ? "100117" : "100201");
-
+let bookingID = document.getElementById('manualBookingID') ? document.getElementById('manualBookingID').value : (isBoth ? "100933" : (resort === "منتجع تامبا" ? "100117" : "100201"));
     // 2. منطق الحالة والألوان
     let overnightSpan = isOvernight ? `<span class="text-red">يشمل مبيت</span>` : `<span class="text-green">بدون مبيت</span>`;
     let poolSpan = isNoPool ? `<span class="text-red">بدون مسبح</span>` : `<span class="text-green">يشمل مسبح</span>`;
