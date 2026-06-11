@@ -998,8 +998,8 @@ document.getElementById('calendarICSBtn').onclick = function() {
     if(!dateVal) return alert("يرجى اختيار تاريخ الحجز أولاً");
 
     const dateStr = dateVal.replace(/-/g, '');
-    const startDateString = dateStr + "T000000";
-    const endDateString = dateStr + "T235959";
+    //const startDateString = dateStr + "T000000";
+    //const endDateString = dateStr + "T235959";
 
     // جلب رقم الحجز
     const bookingID = document.getElementById('manualBookingID') ? document.getElementById('manualBookingID').value : "";
