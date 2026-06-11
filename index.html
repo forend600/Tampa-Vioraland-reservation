@@ -998,16 +998,9 @@ document.getElementById('calendarICSBtn').onclick = function() {
     if(!dateVal) return alert("يرجى اختيار تاريخ الحجز أولاً");
 
     const dateStr = dateVal.replace(/-/g, '');
-    //const startDateString = dateStr + "T000000";
-    //const endDateString = dateStr + "T235959";
+    const startDateString = dateStr + "T000000";
+    const endDateString = dateStr + "T235959";
 
-    // حساب اليوم التالي لإنشاء الحدث كـ "طوال اليوم" (All-Day) لتفعيل حالة متاح
-    const nextDay = new Date(dateVal);
-    nextDay.setDate(nextDay.getDate() + 1);
-    const y = nextDay.getFullYear();
-    const m = String(nextDay.getMonth() + 1).padStart(2, '0');
-    const d = String(nextDay.getDate()).padStart(2, '0');
-    const endDateStr = `${y}${m}${d}`;
 
     // جلب رقم الحجز
     const bookingID = document.getElementById('manualBookingID') ? document.getElementById('manualBookingID').value : "";
