@@ -998,18 +998,23 @@ document.getElementById('calendarICSBtn').onclick = function() {
     if(!dateVal) return alert("يرجى اختيار تاريخ الحجز أولاً");
 
     const dateStr = dateVal.replace(/-/g, '');
+    
+    // الأكواد المعطلة للرجوع إليها مستقبلاً
+    // const startDateString = dateStr + "T000000";
+    // const endDateString = dateStr + "T235959";
+    
+    // التوقيت الجديد: من 2 ظهراً (14:00) إلى 8:59 مساءً (20:59) داخل نفس اليوم
     const startDateString = dateStr + "T140000";
     const endDateString = dateStr + "T205959";
-
 
     // جلب رقم الحجز
     const bookingID = document.getElementById('manualBookingID') ? document.getElementById('manualBookingID').value : "";
 
     // تجميع الخيارات
     let optionsArr = [];
-    if (!document.getElementById('noPool').checked) optionsArr.push("M"); // إذا لم يتم تحديد (بدون مسبح)، نضع M
-    if (document.getElementById('summer') && document.getElementById('summer').checked) optionsArr.push("S"); // إذا تم تحديد صيف، نضع S
-    if (document.getElementById('overnight').checked) optionsArr.push("N"); // إذا تم تحديد مبيت، نضع N
+    if (!document.getElementById('noPool').checked) optionsArr.push("M"); 
+    if (document.getElementById('summer') && document.getElementById('summer').checked) optionsArr.push("S"); 
+    if (document.getElementById('overnight').checked) optionsArr.push("N"); 
 
     let optionsStr = optionsArr.length > 0 ? " - " + optionsArr.join(" - ") : "";
     const fullTitle = `${name} - ${bookingID}${optionsStr}`.trim();
@@ -1018,7 +1023,8 @@ document.getElementById('calendarICSBtn').onclick = function() {
         action: 'TEMPLATE',
         text: fullTitle, 
         dates: `${startDateString}/${endDateString}`,
-        trp: 'true', // تم التعديل لتكون الحالة Free (متاح)
+        trp: 'true', 
+        transp: 'TRANSPARENT', // إجبار التقويم على حالة "متاح"
         sf: 'true',
         output: 'chrome'
     });
