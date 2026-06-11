@@ -1004,8 +1004,8 @@ document.getElementById('calendarICSBtn').onclick = function() {
     // const endDateString = dateStr + "T235959";
     
     // التوقيت داخل نفس اليوم (من 2 ظهراً إلى 8:59 مساءً) لتجنب تداخل الأيام
-    const startDateString = dateStr + "T140000";
-    const endDateString = dateStr + "T205959";
+    const startDateString = dateStr + "T000100";
+    const endDateString = dateStr + "T235800";
 
     // جلب رقم الحجز
     const bookingID = document.getElementById('manualBookingID') ? document.getElementById('manualBookingID').value : "";
