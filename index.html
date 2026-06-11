@@ -995,32 +995,32 @@ document.getElementById('calendarICSBtn').onclick = function() {
 
     const name = document.getElementById('customerName').value;
     const dateVal = document.getElementById('bookingDate').value;
-    
     if(!dateVal) return alert("يرجى اختيار تاريخ الحجز أولاً");
 
     const dateStr = dateVal.replace(/-/g, '');
     const startDateString = dateStr + "T000000";
     const endDateString = dateStr + "T235959";
 
-    const isBoth = document.getElementById('bookBothResorts').checked;
-    const resortName = isBoth ? "المنتجعين" : document.getElementById('resortSelect').value.replace("منتجع ", "");
-    const statusOvernight = document.getElementById('overnight').checked ? "(مبيت)" : "(بدون مبيت)";
-    const statusPool = document.getElementById('noPool').checked ? "(بدون مسبح)" : "(مسبح)";
-    const statusWinter = document.getElementById('winterPeriod').checked ? "(فترة شتوية)" : "";
+    // جلب رقم الحجز
+    const bookingID = document.getElementById('manualBookingID') ? document.getElementById('manualBookingID').value : "";
 
-    const dep = document.getElementById('deposit').value;
-    const rem = document.getElementById('remaining').value;
-    const fullTitle = `${name}، ${dep}-${rem}، (${resortName})، ${statusOvernight} ${statusPool} ${statusWinter}`.trim();
+    // تجميع الخيارات
+    let optionsArr = [];
+    if (!document.getElementById('noPool').checked) optionsArr.push("M"); // إذا لم يتم تحديد (بدون مسبح)، نضع M
+    if (document.getElementById('summer') && document.getElementById('summer').checked) optionsArr.push("S"); // إذا تم تحديد صيف، نضع S
+    if (document.getElementById('overnight').checked) optionsArr.push("N"); // إذا تم تحديد مبيت، نضع N
+
+    let optionsStr = optionsArr.length > 0 ? " - " + optionsArr.join(" - ") : "";
+    const fullTitle = `${name} - ${bookingID}${optionsStr}`.trim();
 
     const params = new URLSearchParams({
         action: 'TEMPLATE',
         text: fullTitle, 
         dates: `${startDateString}/${endDateString}`,
-        trp: 'false', 
+        trp: 'true', // تم التعديل لتكون الحالة Free (متاح)
         sf: 'true',
         output: 'chrome'
     });
-
     window.open(`https://www.google.com/calendar/render?${params.toString()}`, '_blank');
 
     // تفريغ خانات الوقت بعد الإضافة للتقويم
