@@ -1003,7 +1003,7 @@ document.getElementById('calendarICSBtn').onclick = function() {
     // const startDateString = dateStr + "T000000";
     // const endDateString = dateStr + "T235959";
     
-    // التوقيت الجديد: من 2 ظهراً (14:00) إلى 8:59 مساءً (20:59) داخل نفس اليوم
+    // التوقيت داخل نفس اليوم (من 2 ظهراً إلى 8:59 مساءً) لتجنب تداخل الأيام
     const startDateString = dateStr + "T140000";
     const endDateString = dateStr + "T205959";
 
@@ -1023,8 +1023,8 @@ document.getElementById('calendarICSBtn').onclick = function() {
         action: 'TEMPLATE',
         text: fullTitle, 
         dates: `${startDateString}/${endDateString}`,
-        trp: 'true', 
-        transp: 'TRANSPARENT', // إجبار التقويم على حالة "متاح"
+        trp: 'false', // false هي المعامل الصحيح في نظام قوقل لجعل الحدث متاحاً (Transparent)
+        crm: 'AVAILABLE', // المعامل الإضافي الأقوى لإجبار التقويم الجديد على حالة متاح
         sf: 'true',
         output: 'chrome'
     });
