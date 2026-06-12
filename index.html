@@ -716,10 +716,10 @@ function generateDefaultBookingID() {
     const isBoth = document.getElementById('bookBothResorts').checked;
     const resort = document.getElementById('resortSelect').value;
     const input = document.getElementById('manualBookingID');
-    const randomNum = Math.floor(100000 + Math.random() * 900000); // رقم عشوائي من 6 خانات
+    const randomNum = Math.floor(1000 + Math.random() * 9000); // رقم عشوائي من 6 خانات
     if (input && input.readOnly) {
         input.value = isBoth ?
-        "TV-" + randomNum : (resort === "منتجع تامبا" ? "T-" + randomNum : (resort === "منتجع فيورالاند" ? "V-" + randomNum : ""));
+        "TV-9" + randomNum : (resort === "منتجع تامبا" ? "T-5" + randomNum : (resort === "منتجع فيورالاند" ? "V-1" + randomNum : ""));
     }
 }
 
@@ -766,9 +766,9 @@ function showContract() {
     const isTwelveHours = document.getElementById('twelveHours').checked;
 
     // 1. تحديد رقم الحجز الثابت
-const randomFallback = Math.floor(100000 + Math.random() * 900000);
+const randomFallback = Math.floor(1000 + Math.random() * 9000);
 let bookingID = document.getElementById('manualBookingID') && document.getElementById('manualBookingID').value ?
-document.getElementById('manualBookingID').value : (isBoth ? "TV-" + randomFallback : (resort === "منتجع تامبا" ? "T-" + randomFallback : "V-" + randomFallback));
+document.getElementById('manualBookingID').value : (isBoth ? "TV-9" + randomFallback : (resort === "منتجع تامبا" ? "T-5" + randomFallback : "V-1" + randomFallback));
     // 2. منطق الحالة والألوان
     let overnightSpan = isOvernight ? `<span class="text-red">يشمل مبيت</span>` : `<span class="text-green">بدون مبيت</span>`;
     let poolSpan = isNoPool ? `<span class="text-red">بدون مسبح</span>` : `<span class="text-green">يشمل مسبح</span>`;
